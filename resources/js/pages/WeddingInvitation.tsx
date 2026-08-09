@@ -56,43 +56,17 @@ export default function WeddingInvitationPage() {
   const [musicPlaying, setMusicPlaying] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [rsvpChoice, setRsvpChoice] = useState<'yes' | 'no' | null>(null);
+  const [entered, setEntered] = useState(false);
+  const [gateVisible, setGateVisible] = useState(true);
 
   useEffect(() => {
-    const unmuteOnGesture = () => {
-      const p = ytPlayerRef.current;
-      if (p?.unMute) {
-        p.unMute();
-        p.playVideo();
-        setMusicPlaying(true);
-      }
-      window.removeEventListener('pointerdown', unmuteOnGesture);
-      window.removeEventListener('scroll', unmuteOnGesture, true);
-      window.removeEventListener('touchstart', unmuteOnGesture);
-    };
-    window.addEventListener('pointerdown', unmuteOnGesture);
-    window.addEventListener('scroll', unmuteOnGesture, true);
-    window.addEventListener('touchstart', unmuteOnGesture);
-
     const init = () => {
       ytPlayerRef.current = new window.YT.Player('yt-player', {
         videoId: 'fJ0o57DOIiA',
-        playerVars: { start: 15, controls: 0, disablekb: 1, playsinline: 1, autoplay: 1, mute: 0 },
+        playerVars: { start: 15, controls: 0, disablekb: 1, playsinline: 1, autoplay: 0, mute: 0 },
         events: {
           onReady: (e: any) => {
             e.target.seekTo(15, true);
-            e.target.playVideo();
-            // Browsers that block unmuted autoplay leave the player paused/unstarted;
-            // fall back to muted autoplay so it isn't silent forever, then the
-            // gesture listener above unmutes it on the visitor's first tap/scroll.
-            setTimeout(() => {
-              if (e.target.getPlayerState() === 1) {
-                setMusicPlaying(true);
-              } else {
-                e.target.mute();
-                e.target.playVideo();
-                setMusicPlaying(false);
-              }
-            }, 800);
           },
           onError: (e: any) => console.error('YT player error', e.data),
         },
@@ -111,13 +85,18 @@ export default function WeddingInvitationPage() {
         init();
       };
     }
-
-    return () => {
-      window.removeEventListener('pointerdown', unmuteOnGesture);
-      window.removeEventListener('scroll', unmuteOnGesture, true);
-      window.removeEventListener('touchstart', unmuteOnGesture);
-    };
   }, []);
+
+  const handleEnter = () => {
+    setEntered(true);
+    setTimeout(() => setGateVisible(false), 900);
+    const p = ytPlayerRef.current;
+    if (p?.playVideo) {
+      p.seekTo(15, true);
+      p.playVideo();
+      setMusicPlaying(true);
+    }
+  };
 
   const toggleMusic = () => {
     const p = ytPlayerRef.current;
@@ -155,7 +134,47 @@ export default function WeddingInvitationPage() {
     <>
       <div id="yt-player" style={{ position: 'fixed', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }} />
 
-      <div ref={scrollerRef} onScroll={onScroll} className="scroller" style={{ width: '100%' }}>
+      {gateVisible && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '48px 28px',
+            opacity: entered ? 0 : 1,
+            transition: 'opacity 900ms ease',
+            pointerEvents: entered ? 'none' : 'auto',
+          }}
+        >
+          <img
+            src="/assets/couple-hero.jpg"
+            alt=""
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'grayscale(100%) blur(22px)', transform: 'scale(1.15)', zIndex: 0 }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(0.25 0.03 320 / 0.55) 0%, oklch(0.2 0.03 320 / 0.65) 65%, oklch(0.18 0.03 320 / 0.75) 100%)', zIndex: 1 }} />
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.98 0.005 0)', margin: '0 0 24px' }}>Dear Guest</p>
+            <button
+              onClick={handleEnter}
+              style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '16px 40px', cursor: 'pointer' }}
+            >
+              Join Our Story
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div
+        ref={scrollerRef}
+        onScroll={onScroll}
+        className="scroller"
+        style={{ width: '100%', opacity: entered ? 1 : 0, transition: 'opacity 1000ms ease 150ms' }}
+      >
 
         {/* Hero */}
         <section data-screen-label="Hero" className="page" style={{ paddingBottom: 96, color: 'oklch(0.98 0.005 0)' }}>
@@ -182,6 +201,7 @@ export default function WeddingInvitationPage() {
           <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.45 0.07 310)', margin: '0 0 20px' }}>Save the date</p>
           <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 'clamp(64px,22vw,140px)', lineHeight: 0.9, color: 'oklch(0.28 0.03 310)', margin: 0 }}>24</h2>
           <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 'clamp(26px,6vw,38px)', color: 'oklch(0.35 0.04 310)', margin: '10px 0 0' }}>September 2026</p>
+          <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'oklch(0.45 0.05 320)', margin: '14px 0 0' }}>08:00 PM</p>
           <div style={{ display: 'flex', gap: 22, marginTop: 40 }}>
             {COUNTDOWN_PARTS.map((part) => (
               <div key={part.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 56 }}>
