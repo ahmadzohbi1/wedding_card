@@ -1,0 +1,42 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: oklch(0.985 0.008 320);
+}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+a {
+  color: oklch(0.45 0.09 320);
+  text-decoration: none;
+}
+a:hover {
+  color: oklch(0.38 0.1 320);
+}
+.scroller {
+  scroll-snap-type: y mandatory;
+  overflow-y: auto;
+  height: 100svh;
+  scroll-behavior: smooth;
+}
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+.page {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  height: 100svh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 48px 28px;
+  text-align: center;
+}
+@keyframes bounceDown {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(8px); opacity: 1; }
+}
