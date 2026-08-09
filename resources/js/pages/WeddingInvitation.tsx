@@ -76,12 +76,23 @@ export default function WeddingInvitationPage() {
     const init = () => {
       ytPlayerRef.current = new window.YT.Player('yt-player', {
         videoId: 'fJ0o57DOIiA',
-        playerVars: { start: 15, controls: 0, disablekb: 1, playsinline: 1, autoplay: 1, mute: 1 },
+        playerVars: { start: 15, controls: 0, disablekb: 1, playsinline: 1, autoplay: 1, mute: 0 },
         events: {
           onReady: (e: any) => {
             e.target.seekTo(15, true);
             e.target.playVideo();
-            setMusicPlaying(true);
+            // Browsers that block unmuted autoplay leave the player paused/unstarted;
+            // fall back to muted autoplay so it isn't silent forever, then the
+            // gesture listener above unmutes it on the visitor's first tap/scroll.
+            setTimeout(() => {
+              if (e.target.getPlayerState() === 1) {
+                setMusicPlaying(true);
+              } else {
+                e.target.mute();
+                e.target.playVideo();
+                setMusicPlaying(false);
+              }
+            }, 800);
           },
           onError: (e: any) => console.error('YT player error', e.data),
         },
