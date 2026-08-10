@@ -387,12 +387,18 @@ function getInitialView(): NavKey {
 
 export default function AdminDashboard() {
   const [view, setViewState] = useState<NavKey>(getInitialView);
+  const [viewFading, setViewFading] = useState(false);
 
   const setView = (key: NavKey) => {
-    setViewState(key);
-    const url = new URL(window.location.href);
-    url.searchParams.set('view', key);
-    window.history.replaceState({}, '', url);
+    if (key === view) return;
+    setViewFading(true);
+    setTimeout(() => {
+      setViewState(key);
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', key);
+      window.history.replaceState({}, '', url);
+      setViewFading(false);
+    }, 150);
   };
 
   const [guests, setGuests] = useState<GuestGroup[]>([]);
@@ -530,6 +536,7 @@ export default function AdminDashboard() {
         <Sidebar active={view} onSelect={setView} />
 
         <div className="admin-main">
+        <div style={{ opacity: viewFading ? 0 : 1, transition: 'opacity 150ms ease' }}>
           {view === 'overview' && (
             <>
               <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(0.3 0.03 320)', margin: '0 0 20px' }}>Overview</h1>
@@ -629,6 +636,7 @@ export default function AdminDashboard() {
               </div>
             </>
           )}
+        </div>
         </div>
       </div>
 
