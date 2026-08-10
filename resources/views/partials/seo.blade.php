@@ -1,6 +1,6 @@
 @php
-    $seoTitle = $seoTitle ?? 'Layla & Ahmad — Wedding Invitation';
-    $seoDescription = $seoDescription ?? 'Join us to celebrate Layla & Ahmad — September 24, 2026, Roche Doree.';
+    $seoTitle = $seoTitle ?? 'Ahmad & Layla — Wedding Invitation';
+    $seoDescription = $seoDescription ?? 'Join us to celebrate Ahmad & Layla — September 24, 2026, Roche Doree.';
     $seoImage = $seoImage ?? asset('assets/og-image.png');
     $seoUrl = $seoUrl ?? url()->current();
 @endphp
@@ -8,7 +8,7 @@
 <link rel="canonical" href="{{ $seoUrl }}">
 
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Layla & Ahmad">
+<meta property="og:site_name" content="Ahmad & Layla">
 <meta property="og:title" content="{{ $seoTitle }}">
 <meta property="og:description" content="{{ $seoDescription }}">
 <meta property="og:url" content="{{ $seoUrl }}">
@@ -22,4 +22,4 @@
 <meta name="twitter:description" content="{{ $seoDescription }}">
 <meta name="twitter:image" content="{{ $seoImage }}">
 
-<meta name="theme-color" content="#89618b">
+<meta name="theme-color" content="#D8B4C5">

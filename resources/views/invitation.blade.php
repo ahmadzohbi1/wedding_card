@@ -5,10 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ $guest['name'] }} — Layla & Ahmad's Wedding Invitation</title>
+        <title>{{ $guest['name'] }} — Ahmad & Layla's Wedding Invitation</title>
         @include('partials.seo', [
-            'seoTitle' => $guest['name']." — Layla & Ahmad's Wedding Invitation",
-            'seoDescription' => "Dear {$guest['name']}, join us to celebrate Layla & Ahmad — September 24, 2026, Roche Doree.",
+            'seoTitle' => $guest['name']." — Ahmad & Layla's Wedding Invitation",
+            'seoDescription' => "Dear {$guest['name']}, join us to celebrate Ahmad & Layla — September 24, 2026, Roche Doree.",
         ])
         @include('partials.favicon')
 

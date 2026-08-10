@@ -25,11 +25,11 @@ export type GuestData = {
 
 type Lang = 'en' | 'ar';
 
-const COUPLE_NAMES: Record<Lang, string> = { en: 'Layla & Ahmad', ar: 'ليلى وأحمد' };
+const COUPLE_NAMES: Record<Lang, string> = { en: 'Ahmad & Layla', ar: 'أحمد وليلى' };
 const WEDDING_DATE_LONG: Record<Lang, string> = { en: 'Thursday, September 24, 2026', ar: 'الخميس، 24 سبتمبر 2026' };
 const WEDDING_DATE_TARGET = new Date(2026, 8, 24, 20, 0, 0);
 const VENUE_NAME: Record<Lang, string> = { en: 'Roche Doree', ar: 'روش دوريه' };
-const VENUE_ADDRESS: Record<Lang, string> = { en: 'Roche Doree — address to follow', ar: 'روش دوريه — العنوان قريبًا' };
+const VENUE_ADDRESS: Record<Lang, string> = { en: 'Roche Doree — address to follow', ar: 'روش دوريه — لمعرفة العنوان' };
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(VENUE_NAME.en)}`;
 
 const TRANSLATIONS = {
@@ -69,7 +69,7 @@ const TRANSLATIONS = {
     willYouJoin: 'Will you be joining us?',
     yesResponse: "Wonderful — we can't wait to celebrate with you!",
     noResponse: "We'll miss you, but thank you for letting us know.",
-    closingQuote: 'With gratitude, we look forward to celebrating this moment with you.',
+    closingQuote: 'With gratitude, we look forward to celebrate this moment with you.',
     sweetDreams: 'Sweet dreams for your kids',
     switchTo: 'Switch to Arabic',
     changeLanguageHint: 'Change language',
@@ -93,7 +93,7 @@ const TRANSLATIONS = {
     honoredPresence: 'يسعدنا حضوركم لحفل زفافنا.',
     theVenue: 'مكان الحفل',
     viewOnMap: 'عرض على الخريطة',
-    registryTitle: 'قائمة الهدايا',
+    registryTitle: 'قائمة هدايا الزفاف',
     registryText: 'حضوركم هو أغلى هدية بالنسبة لنا. ولمن يرغب في تكريمنا أكثر، نتقدم بجزيل الشكر.',
     whishAccount: 'حساب Whish',
     iban: 'IBAN',
@@ -336,8 +336,8 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
           width: 40,
           height: 40,
           borderRadius: '50%',
-          border: '1px solid oklch(from var(--brand) 0.85 0.02 h / 0.9)',
-          background: 'oklch(from var(--brand) 0.99 0.005 h / 0.96)',
+          border: '1px solid #D8B4C5',
+          background: '#D8B4C5',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
           display: 'flex',

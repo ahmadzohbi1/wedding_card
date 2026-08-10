@@ -5,8 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Layla & Ahmad — Wedding Invitation</title>
-        @include('partials.seo', ['seoTitle' => 'Layla & Ahmad — Wedding Invitation'])
+        <title>Ahmad & Layla — Wedding Invitation</title>
+        @include('partials.seo', ['seoTitle' => 'Ahmad & Layla — Wedding Invitation'])
         @include('partials.favicon')
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
