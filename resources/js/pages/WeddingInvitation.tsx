@@ -72,6 +72,8 @@ const TRANSLATIONS = {
     closingQuote: 'With gratitude, we look forward to celebrating this moment with you.',
     sweetDreams: 'Sweet dreams for your kids',
     switchTo: 'Switch to Arabic',
+    changeLanguageHint: 'Change language',
+    volumeHint: 'Turn up your volume & unmute for the full experience',
   },
   ar: {
     dear: (name: string) => `عزيزي/عزيزتي ${name}`,
@@ -112,6 +114,8 @@ const TRANSLATIONS = {
     closingQuote: 'بكل امتنان، نتطلع للاحتفال بهذه اللحظة معكم.',
     sweetDreams: 'أحلامًا سعيدة لأطفالكم',
     switchTo: 'التبديل إلى الإنجليزية',
+    changeLanguageHint: 'تغيير اللغة',
+    volumeHint: 'ارفعوا صوت الجهاز وألغوا الكتم للاستمتاع بالتجربة كاملة',
   },
 } as const;
 
@@ -373,6 +377,15 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'grayscale(100%) blur(22px)', transform: 'scale(1.15)', zIndex: 0 }}
             />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(from var(--brand) 0.25 0.03 h / 0.55) 0%, oklch(from var(--brand) 0.2 0.03 h / 0.65) 65%, oklch(from var(--brand) 0.18 0.03 h / 0.75) 100%)', zIndex: 1 }} />
+
+            <div style={{ position: 'absolute', top: 38, right: 60, transform: 'translateY(-50%)', zIndex: 2, direction: 'ltr', display: 'flex', alignItems: 'center', gap: 8, color: 'oklch(var(--color-paper))' }}>
+              <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', whiteSpace: 'nowrap' }}>{t.changeLanguageHint}</span>
+              <svg width="26" height="14" viewBox="0 0 26 14" fill="none" style={{ flexShrink: 0, animation: 'hoverSideways 1.4s ease-in-out infinite' }}>
+                <line x1="0" y1="7" x2="19" y2="7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                <path d="M14 2 L20 7 L14 12" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(var(--color-paper))', margin: '0 0 24px' }}>{t.dear(guest?.name ?? t.guestFallback)}</p>
               <button
@@ -381,6 +394,15 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
               >
                 {t.joinStory}
               </button>
+            </div>
+
+            <div style={{ position: 'absolute', bottom: 40, left: 0, right: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '0 40px', color: 'oklch(from var(--brand) 0.95 0.01 h)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ flexShrink: 0 }}>
+                <path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor" stroke="none" />
+                <path d="M16 8a5 5 0 0 1 0 8" strokeLinecap="round" />
+                <path d="M18.5 5.5a9 9 0 0 1 0 13" strokeLinecap="round" />
+              </svg>
+              <span style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.04em', textAlign: 'center' }}>{t.volumeHint}</span>
             </div>
           </div>
         )}

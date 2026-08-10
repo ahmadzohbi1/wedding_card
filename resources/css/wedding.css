@@ -40,3 +40,7 @@ a:hover {
   0%, 100% { transform: translateY(0); opacity: 0.55; }
   50% { transform: translateY(8px); opacity: 1; }
 }
+@keyframes hoverSideways {
+  0%, 100% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+}
