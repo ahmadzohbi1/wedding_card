@@ -29,9 +29,9 @@ const NAV_ITEMS: { key: NavKey; label: string }[] = [
 ];
 
 const STATUS_COLOR: Record<RsvpStatus, { bg: string; fg: string }> = {
-  yes: { bg: 'oklch(0.93 0.09 150)', fg: 'oklch(0.4 0.13 150)' },
-  no: { bg: 'oklch(0.93 0.07 25)', fg: 'oklch(0.45 0.15 25)' },
-  pending: { bg: 'oklch(0.93 0.01 320)', fg: 'oklch(0.5 0.02 320)' },
+  yes: { bg: 'oklch(var(--color-success-bg))', fg: 'oklch(var(--color-success))' },
+  no: { bg: 'oklch(var(--color-danger-bg))', fg: 'oklch(var(--color-danger))' },
+  pending: { bg: 'oklch(from var(--brand) 0.93 0.01 h)', fg: 'oklch(from var(--brand) 0.5 0.02 h)' },
 };
 
 async function api(url: string, options: RequestInit = {}) {
@@ -57,7 +57,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 14,
   padding: '9px 12px',
   borderRadius: 8,
-  border: '1px solid oklch(0.82 0.02 320)',
+  border: '1px solid oklch(from var(--brand) 0.82 0.02 h)',
   boxSizing: 'border-box',
 };
 
@@ -65,10 +65,10 @@ const removeBtnStyle: React.CSSProperties = {
   width: 34,
   fontFamily: "'Jost',sans-serif",
   fontSize: 16,
-  border: '1px solid oklch(0.82 0.02 320)',
+  border: '1px solid oklch(from var(--brand) 0.82 0.02 h)',
   borderRadius: 8,
   background: 'none',
-  color: 'oklch(0.5 0.05 320)',
+  color: 'oklch(from var(--brand) 0.5 0.05 h)',
   cursor: 'pointer',
 };
 
@@ -76,10 +76,10 @@ const addBtnStyle: React.CSSProperties = {
   fontFamily: "'Jost',sans-serif",
   fontSize: 12,
   letterSpacing: '0.05em',
-  border: '1px dashed oklch(0.6 0.06 325)',
+  border: '1px dashed oklch(from var(--brand) 0.6 0.06 h)',
   borderRadius: 20,
   background: 'none',
-  color: 'oklch(0.45 0.08 325)',
+  color: 'oklch(from var(--brand) 0.45 0.08 h)',
   padding: '7px 16px',
   cursor: 'pointer',
 };
@@ -99,8 +99,8 @@ const primaryBtnStyle: React.CSSProperties = {
   fontSize: 13,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  background: 'oklch(0.55 0.08 325)',
-  color: 'oklch(0.99 0.005 0)',
+  background: 'oklch(from var(--brand) 0.55 0.08 h)',
+  color: 'oklch(var(--color-paper))',
   border: 'none',
   borderRadius: 30,
   padding: '11px 26px',
@@ -112,16 +112,16 @@ const labelStyle: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  color: 'oklch(0.45 0.05 320)',
+  color: 'oklch(from var(--brand) 0.45 0.05 h)',
   display: 'block',
   marginBottom: 6,
 };
 
 function StatTile({ label, value, color }: { label: string; value: number; color?: string }) {
   return (
-    <div style={{ background: 'oklch(0.99 0.005 320)', border: '1px solid oklch(0.87 0.015 320)', borderRadius: 12, padding: '16px 18px' }}>
+    <div style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 12, padding: '16px 18px' }}>
       <p style={{ ...labelStyle, marginBottom: 6 }}>{label}</p>
-      <p style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 30, color: color ?? 'oklch(0.3 0.03 320)', margin: 0 }}>{value}</p>
+      <p style={{ fontFamily: "'Jost',sans-serif", fontWeight: 600, fontSize: 30, color: color ?? 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>{value}</p>
     </div>
   );
 }
@@ -154,12 +154,12 @@ function Modal({ title, onClose, children, width = 440 }: { title: string; onClo
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'oklch(0.2 0.02 320 / 0.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '5vh 16px', zIndex: 50, overflowY: 'auto' }}
+      style={{ position: 'fixed', inset: 0, background: 'oklch(from var(--brand) 0.2 0.02 h / 0.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '5vh 16px', zIndex: 50, overflowY: 'auto' }}
     >
-      <div onClick={(e) => e.stopPropagation()} style={{ background: 'oklch(0.99 0.005 320)', borderRadius: 14, padding: '24px 22px', width: `min(${width}px, 100%)`, boxShadow: '0 20px 50px oklch(0.2 0.03 320 / 0.25)' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', borderRadius: 14, padding: '24px 22px', width: `min(${width}px, 100%)`, boxShadow: '0 20px 50px oklch(from var(--brand) 0.2 0.03 h / 0.25)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 22, color: 'oklch(0.3 0.03 320)', margin: 0 }}>{title}</h3>
-          <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', fontSize: 22, lineHeight: 1, color: 'oklch(0.5 0.03 320)', cursor: 'pointer' }}>×</button>
+          <h3 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 22, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>{title}</h3>
+          <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', fontSize: 22, lineHeight: 1, color: 'oklch(from var(--brand) 0.5 0.03 h)', cursor: 'pointer' }}>×</button>
         </div>
         {children}
       </div>
@@ -180,7 +180,7 @@ function ToggleSwitch({ checked, onChange, disabled }: { checked: boolean; onCha
         borderRadius: 20,
         border: 'none',
         cursor: disabled ? 'default' : 'pointer',
-        background: checked ? 'oklch(0.55 0.08 325)' : 'oklch(0.85 0.02 320)',
+        background: checked ? 'oklch(from var(--brand) 0.55 0.08 h)' : 'oklch(from var(--brand) 0.85 0.02 h)',
         position: 'relative',
         flexShrink: 0,
         opacity: disabled ? 0.6 : 1,
@@ -195,9 +195,9 @@ function ToggleSwitch({ checked, onChange, disabled }: { checked: boolean; onCha
           width: 24,
           height: 24,
           borderRadius: '50%',
-          background: 'oklch(0.99 0.005 0)',
+          background: 'oklch(var(--color-paper))',
           transition: 'left 200ms',
-          boxShadow: '0 1px 3px oklch(0.2 0.02 320 / 0.3)',
+          boxShadow: '0 1px 3px oklch(from var(--brand) 0.2 0.02 h / 0.3)',
         }}
       />
     </button>
@@ -224,7 +224,7 @@ function GuestFormModal({ form, saving, error, onCancel, onSubmit }: {
       <label style={labelStyle}>Main guest name</label>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Moustafa" style={{ ...inputStyle, marginBottom: 14 }} />
       <MemberInputList members={members.map((m) => m.name)} onChange={(names) => setMembers(names.map((n, i) => ({ id: members[i]?.id, name: n })))} />
-      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(0.5 0.15 25)', marginBottom: 10 }}>{error}</p>}
+      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
       <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
         <button
           onClick={() => onSubmit(name, members.filter((m) => m.name.trim() !== ''))}
@@ -262,20 +262,20 @@ function BulkAddModal({ saving, error, onCancel, onSubmit }: {
 
   return (
     <Modal title="Bulk add guests" onClose={onCancel} width={560}>
-      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(0.5 0.03 320)', margin: '0 0 16px' }}>
+      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: '0 0 16px' }}>
         Add several main guests and their family or party members at once.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: '48vh', overflowY: 'auto', paddingRight: 4, marginBottom: 14 }}>
         {blocks.map((block, i) => (
-          <div key={i} style={{ border: '1px solid oklch(0.87 0.015 320)', borderRadius: 10, padding: '14px 14px 4px' }}>
+          <div key={i} style={{ border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 10, padding: '14px 14px 4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <p style={{ ...labelStyle, marginBottom: 0 }}>Guest {i + 1}</p>
               {blocks.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeBlock(i)}
-                  style={{ background: 'none', border: 'none', color: 'oklch(0.5 0.13 25)', cursor: 'pointer', fontFamily: "'Jost',sans-serif", fontSize: 12 }}
+                  style={{ background: 'none', border: 'none', color: 'oklch(var(--color-danger))', cursor: 'pointer', fontFamily: "'Jost',sans-serif", fontSize: 12 }}
                 >
                   Remove
                 </button>
@@ -294,7 +294,7 @@ function BulkAddModal({ saving, error, onCancel, onSubmit }: {
 
       <button type="button" onClick={addBlock} style={{ ...addBtnStyle, marginBottom: 16 }}>+ Add another guest</button>
 
-      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(0.5 0.15 25)', marginBottom: 10 }}>{error}</p>}
+      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
 
       <div style={{ display: 'flex', gap: 10 }}>
         <button onClick={() => onSubmit(readyGuests)} disabled={saving || readyGuests.length === 0} style={primaryBtnStyle}>
@@ -322,16 +322,16 @@ function GuestViewModal({ guest, onClose }: { guest: GuestGroup; onClose: () => 
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
         {guest.members.map((m) => (
-          <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'oklch(0.97 0.008 320)', borderRadius: 8, padding: '9px 12px' }}>
-            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(0.3 0.03 320)' }}>{m.name}{m.is_primary ? ' ★' : ''}</span>
+          <div key={m.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'oklch(from var(--brand) 0.97 0.008 h)', borderRadius: 8, padding: '9px 12px' }}>
+            <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.3 0.03 h)' }}>{m.name}{m.is_primary ? ' ★' : ''}</span>
             <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, background: STATUS_COLOR[m.rsvp_status].bg, color: STATUS_COLOR[m.rsvp_status].fg, borderRadius: 20, padding: '3px 12px', textTransform: 'capitalize' }}>
               {m.rsvp_status}
             </span>
           </div>
         ))}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'oklch(0.97 0.008 320)', borderRadius: 8, padding: '8px 10px', marginBottom: 18 }}>
-        <span style={{ fontFamily: "'Courier New',monospace", fontSize: 12, color: 'oklch(0.4 0.03 320)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{guest.url}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'oklch(from var(--brand) 0.97 0.008 h)', borderRadius: 8, padding: '8px 10px', marginBottom: 18 }}>
+        <span style={{ fontFamily: "'Courier New',monospace", fontSize: 12, color: 'oklch(from var(--brand) 0.4 0.03 h)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{guest.url}</span>
         <button onClick={copyLink} style={{ ...addBtnStyle, flexShrink: 0 }}>{copied ? 'Copied' : 'Copy link'}</button>
       </div>
       <button onClick={onClose} style={solidBtnStyle}>Close</button>
@@ -343,8 +343,8 @@ function Sidebar({ active, onSelect }: { active: NavKey; onSelect: (key: NavKey)
   return (
     <nav className="admin-sidebar">
       <div className="admin-sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <BrandMark size={30} color="oklch(0.55 0.08 325)" />
-        <p style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 20, color: 'oklch(0.3 0.03 320)', margin: 0 }}>Admin</p>
+        <BrandMark size={30} color="oklch(from var(--brand) 0.55 0.08 h)" />
+        <p style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 20, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>Admin</p>
       </div>
       <div className="admin-sidebar-nav">
         {NAV_ITEMS.map((item) => (
@@ -361,8 +361,8 @@ function Sidebar({ active, onSelect }: { active: NavKey; onSelect: (key: NavKey)
               cursor: 'pointer',
               padding: '10px 16px',
               borderRadius: 10,
-              background: active === item.key ? 'oklch(0.55 0.08 325)' : 'none',
-              color: active === item.key ? 'oklch(0.99 0.005 0)' : 'oklch(0.4 0.04 320)',
+              background: active === item.key ? 'oklch(from var(--brand) 0.55 0.08 h)' : 'none',
+              color: active === item.key ? 'oklch(var(--color-paper))' : 'oklch(from var(--brand) 0.4 0.04 h)',
               whiteSpace: 'nowrap',
             }}
           >
@@ -539,16 +539,16 @@ export default function AdminDashboard() {
         <div style={{ opacity: viewFading ? 0 : 1, transition: 'opacity 150ms ease' }}>
           {view === 'overview' && (
             <>
-              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(0.3 0.03 320)', margin: '0 0 20px' }}>Overview</h1>
+              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 20px' }}>Overview</h1>
               <div className="stat-grid">
                 <StatTile label="Total guests" value={totals.total} />
                 <StatTile label="Accepted" value={totals.accepted} color={STATUS_COLOR.yes.fg} />
                 <StatTile label="Declined" value={totals.declined} color={STATUS_COLOR.no.fg} />
                 <StatTile label="Pending" value={totals.pending} color={STATUS_COLOR.pending.fg} />
               </div>
-              <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(0.45 0.03 320)', marginTop: 20 }}>
+              <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.45 0.03 h)', marginTop: 20 }}>
                 {guests.length} invitation{guests.length === 1 ? '' : 's'} sent so far.{' '}
-                <button onClick={() => setView('invitations')} style={{ background: 'none', border: 'none', padding: 0, color: 'oklch(0.45 0.08 325)', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>
+                <button onClick={() => setView('invitations')} style={{ background: 'none', border: 'none', padding: 0, color: 'oklch(from var(--brand) 0.45 0.08 h)', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>
                   View all invitations
                 </button>
               </p>
@@ -558,7 +558,7 @@ export default function AdminDashboard() {
           {view === 'invitations' && (
             <>
               <div className="admin-panel-header">
-                <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(0.3 0.03 320)', margin: 0 }}>Invitations ({guests.length})</h1>
+                <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>Invitations ({guests.length})</h1>
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                   <button onClick={() => setFormState({ mode: 'create' })} style={primaryBtnStyle}>+ Add guest</button>
                   <button onClick={() => setBulkOpen(true)} style={solidBtnStyle}>+ Bulk add</button>
@@ -566,11 +566,11 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {loading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(0.5 0.03 320)' }}>Loading…</p>}
-              {loadError && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(0.5 0.15 25)' }}>{loadError}</p>}
+              {loading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>Loading…</p>}
+              {loadError && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(var(--color-danger))' }}>{loadError}</p>}
 
               {!loading && !loadError && guests.length === 0 && (
-                <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(0.5 0.03 320)' }}>No invitations yet. Click "+ Add guest" to create one.</p>
+                <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>No invitations yet. Click "+ Add guest" to create one.</p>
               )}
 
               {guests.length > 0 && (
@@ -588,7 +588,7 @@ export default function AdminDashboard() {
                     <tbody>
                       {guests.map((guest) => (
                         <tr key={guest.id}>
-                          <td style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, color: 'oklch(0.3 0.03 320)' }}>{guest.name}</td>
+                          <td style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 18, color: 'oklch(from var(--brand) 0.3 0.03 h)' }}>{guest.name}</td>
                           <td>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                               {guest.members.map((m) => (
@@ -612,7 +612,7 @@ export default function AdminDashboard() {
                             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                               <button onClick={() => setViewingGuest(guest)} style={solidBtnStyle}>View</button>
                               <button onClick={() => setFormState({ mode: 'edit', guest })} style={solidBtnStyle}>Edit</button>
-                              <button onClick={() => deleteGuest(guest)} style={{ ...solidBtnStyle, borderColor: 'oklch(0.7 0.1 25)', color: 'oklch(0.5 0.13 25)' }}>Delete</button>
+                              <button onClick={() => deleteGuest(guest)} style={{ ...solidBtnStyle, borderColor: 'oklch(var(--color-danger-border))', color: 'oklch(var(--color-danger))' }}>Delete</button>
                             </div>
                           </td>
                         </tr>
@@ -626,11 +626,11 @@ export default function AdminDashboard() {
 
           {view === 'settings' && (
             <>
-              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(0.3 0.03 320)', margin: '0 0 20px' }}>Settings</h1>
-              <div style={{ background: 'oklch(0.99 0.005 320)', border: '1px solid oklch(0.87 0.015 320)', borderRadius: 12, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, maxWidth: 520 }}>
+              <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 20px' }}>Settings</h1>
+              <div style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 12, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, maxWidth: 520 }}>
                 <div>
-                  <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 15, color: 'oklch(0.3 0.03 320)', margin: '0 0 4px' }}>"Sweet dreams for your kids"</p>
-                  <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(0.5 0.03 320)', margin: 0 }}>Show this line at the end of every invitation.</p>
+                  <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 15, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 4px' }}>"Sweet dreams for your kids"</p>
+                  <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: 0 }}>Show this line at the end of every invitation.</p>
                 </div>
                 <ToggleSwitch checked={showKidsMessage} onChange={toggleKidsMessage} disabled={settingsLoading || settingsSaving} />
               </div>

@@ -7,3 +7,32 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/*
+ * Site color system.
+ *
+ * --brand is the single knob for the whole site's identity color. Every
+ * "brand family" color elsewhere (buttons, links, borders, headings, page
+ * backgrounds, decorative accents) is written as:
+ *
+ *     oklch(from var(--brand) <L> <C> h)
+ *
+ * which keeps that element's own tuned lightness/contrast (L, C) but always
+ * takes its hue live from --brand. Change --brand once here and the entire
+ * site — public invitation pages and the admin dashboard — re-themes
+ * automatically. No color literals should be hardcoded in components; add a
+ * new token below instead.
+ */
+:root {
+    --brand: #D8B4C5;
+
+    /* Fixed tokens: intentionally NOT tied to --brand's hue (status colors
+       must stay recognizably green/red regardless of theme; paper is a
+       near-white text-on-photo color). */
+    --color-paper: 0.985 0.005 0;
+    --color-success: 0.4 0.13 150;
+    --color-success-bg: 0.93 0.09 150;
+    --color-danger: 0.45 0.15 25;
+    --color-danger-border: 0.7 0.1 25;
+    --color-danger-bg: 0.93 0.07 25;
+}

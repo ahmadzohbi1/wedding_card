@@ -7,16 +7,16 @@ const shell: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '32px 20px',
-  background: 'linear-gradient(160deg, oklch(0.96 0.02 300) 0%, oklch(0.94 0.03 320) 100%)',
+  background: 'linear-gradient(160deg, oklch(from var(--brand) 0.96 0.02 h) 0%, oklch(from var(--brand) 0.94 0.03 h) 100%)',
 };
 
 const card: React.CSSProperties = {
   width: 'min(360px, 100%)',
-  background: 'oklch(0.99 0.005 320)',
-  border: '1px solid oklch(0.85 0.02 320)',
+  background: 'oklch(from var(--brand) 0.99 0.005 h)',
+  border: '1px solid oklch(from var(--brand) 0.85 0.02 h)',
   borderRadius: 14,
   padding: '36px 30px',
-  boxShadow: '0 12px 32px oklch(0.3 0.03 320 / 0.12)',
+  boxShadow: '0 12px 32px oklch(from var(--brand) 0.3 0.03 h / 0.12)',
 };
 
 const label: React.CSSProperties = {
@@ -24,7 +24,7 @@ const label: React.CSSProperties = {
   fontSize: 11,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: 'oklch(0.45 0.05 320)',
+  color: 'oklch(from var(--brand) 0.45 0.05 h)',
   display: 'block',
   margin: '0 0 6px',
 };
@@ -35,28 +35,28 @@ const input: React.CSSProperties = {
   fontSize: 15,
   padding: '11px 14px',
   borderRadius: 8,
-  border: '1px solid oklch(0.82 0.02 320)',
+  border: '1px solid oklch(from var(--brand) 0.82 0.02 h)',
   marginBottom: 18,
   boxSizing: 'border-box',
   background: 'oklch(1 0 0)',
-  color: 'oklch(0.25 0.03 320)',
+  color: 'oklch(from var(--brand) 0.25 0.03 h)',
 };
 
 export default function AdminLogin({ errors, oldEmail }: { errors: string[]; oldEmail: string }) {
   return (
     <div style={shell}>
       <div style={card}>
-        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.45 0.07 310)', margin: '0 0 6px', textAlign: 'center' }}>
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 6px', textAlign: 'center' }}>
           Admin
         </p>
-        <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 30, color: 'oklch(0.3 0.03 320)', margin: '0 0 26px', textAlign: 'center' }}>
+        <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 30, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 26px', textAlign: 'center' }}>
           Sign in
         </h1>
 
         {errors.length > 0 && (
-          <div style={{ background: 'oklch(0.95 0.05 25)', border: '1px solid oklch(0.75 0.1 25)', borderRadius: 8, padding: '10px 14px', marginBottom: 18 }}>
+          <div style={{ background: 'oklch(var(--color-danger-bg))', border: '1px solid oklch(var(--color-danger-border))', borderRadius: 8, padding: '10px 14px', marginBottom: 18 }}>
             {errors.map((err) => (
-              <p key={err} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(0.4 0.15 25)', margin: 0 }}>{err}</p>
+              <p key={err} style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(var(--color-danger))', margin: 0 }}>{err}</p>
             ))}
           </div>
         )}
@@ -72,7 +72,7 @@ export default function AdminLogin({ errors, oldEmail }: { errors: string[]; old
 
           <button
             type="submit"
-            style={{ width: '100%', fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '13px 0', cursor: 'pointer' }}
+            style={{ width: '100%', fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'oklch(from var(--brand) 0.55 0.08 h)', color: 'oklch(var(--color-paper))', border: 'none', borderRadius: 30, padding: '13px 0', cursor: 'pointer' }}
           >
             Sign in
           </button>

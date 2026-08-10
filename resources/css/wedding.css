@@ -1,18 +1,18 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: oklch(0.985 0.008 320);
+  background: oklch(from var(--brand) 0.985 0.008 h);
 }
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
 a {
-  color: oklch(0.45 0.09 320);
+  color: oklch(from var(--brand) 0.45 0.09 h);
   text-decoration: none;
 }
 a:hover {
-  color: oklch(0.38 0.1 320);
+  color: oklch(from var(--brand) 0.38 0.1 h);
 }
 .scroller {
   scroll-snap-type: y mandatory;

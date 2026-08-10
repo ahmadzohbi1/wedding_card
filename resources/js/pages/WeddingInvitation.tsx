@@ -151,10 +151,10 @@ function ElegantCorners() {
   const line = (extra: React.CSSProperties) => ({ position: 'absolute' as const, zIndex: 1, ...extra });
   return (
     <>
-      <div style={line({ top: 18, left: 18, width: 64, height: 64, borderTop: '1px solid oklch(0.97 0.01 330 / 0.85)', borderLeft: '1px solid oklch(0.97 0.01 330 / 0.85)' })} />
-      <div style={line({ top: 26, left: 26, width: 44, height: 44, borderTop: '1px solid oklch(0.97 0.01 330 / 0.55)', borderLeft: '1px solid oklch(0.97 0.01 330 / 0.55)' })} />
-      <div style={line({ bottom: 18, right: 18, width: 64, height: 64, borderBottom: '1px solid oklch(0.97 0.01 330 / 0.85)', borderRight: '1px solid oklch(0.97 0.01 330 / 0.85)' })} />
-      <div style={line({ bottom: 26, right: 26, width: 44, height: 44, borderBottom: '1px solid oklch(0.97 0.01 330 / 0.55)', borderRight: '1px solid oklch(0.97 0.01 330 / 0.55)' })} />
+      <div style={line({ top: 18, left: 18, width: 64, height: 64, borderTop: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.85)', borderLeft: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.85)' })} />
+      <div style={line({ top: 26, left: 26, width: 44, height: 44, borderTop: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.55)', borderLeft: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.55)' })} />
+      <div style={line({ bottom: 18, right: 18, width: 64, height: 64, borderBottom: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.85)', borderRight: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.85)' })} />
+      <div style={line({ bottom: 26, right: 26, width: 44, height: 44, borderBottom: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.55)', borderRight: '1px solid oklch(from var(--brand) 0.97 0.01 h / 0.55)' })} />
     </>
   );
 }
@@ -332,8 +332,8 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
           width: 40,
           height: 40,
           borderRadius: '50%',
-          border: '1px solid oklch(0.85 0.02 320 / 0.9)',
-          background: 'oklch(0.99 0.005 320 / 0.96)',
+          border: '1px solid oklch(from var(--brand) 0.85 0.02 h / 0.9)',
+          background: 'oklch(from var(--brand) 0.99 0.005 h / 0.96)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
           display: 'flex',
@@ -341,9 +341,9 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
           justifyContent: 'center',
           fontFamily: lang === 'en' ? "'Amiri', serif" : "'Cormorant Garamond', serif",
           fontSize: 17,
-          color: 'oklch(0.4 0.07 325)',
+          color: 'oklch(from var(--brand) 0.4 0.07 h)',
           cursor: 'pointer',
-          boxShadow: '0 2px 12px oklch(0.3 0.03 320 / 0.3)',
+          boxShadow: '0 2px 12px oklch(from var(--brand) 0.3 0.03 h / 0.3)',
         }}
       >
         {lang === 'en' ? 'ع' : 'E'}
@@ -372,12 +372,12 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
               alt=""
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', filter: 'grayscale(100%) blur(22px)', transform: 'scale(1.15)', zIndex: 0 }}
             />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(0.25 0.03 320 / 0.55) 0%, oklch(0.2 0.03 320 / 0.65) 65%, oklch(0.18 0.03 320 / 0.75) 100%)', zIndex: 1 }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(from var(--brand) 0.25 0.03 h / 0.55) 0%, oklch(from var(--brand) 0.2 0.03 h / 0.65) 65%, oklch(from var(--brand) 0.18 0.03 h / 0.75) 100%)', zIndex: 1 }} />
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.98 0.005 0)', margin: '0 0 24px' }}>{t.dear(guest?.name ?? t.guestFallback)}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(var(--color-paper))', margin: '0 0 24px' }}>{t.dear(guest?.name ?? t.guestFallback)}</p>
               <button
                 onClick={handleEnter}
-                style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '16px 40px', cursor: 'pointer' }}
+                style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'oklch(from var(--brand) 0.55 0.08 h)', color: 'oklch(var(--color-paper))', border: 'none', borderRadius: 30, padding: '16px 40px', cursor: 'pointer' }}
               >
                 {t.joinStory}
               </button>
@@ -393,77 +393,77 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
         >
 
           {/* Hero */}
-          <section data-screen-label="Hero" className="page" style={{ paddingBottom: 96, color: 'oklch(0.98 0.005 0)' }}>
+          <section data-screen-label="Hero" className="page" style={{ paddingBottom: 96, color: 'oklch(var(--color-paper))' }}>
             <img src="/assets/couple-hero.jpg" alt={COUPLE_NAMES[lang]} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', zIndex: 0, filter: 'grayscale(100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(0.25 0.03 320 / 0.35) 0%, oklch(0.2 0.03 320 / 0.55) 65%, oklch(0.18 0.03 320 / 0.7) 100%)', zIndex: 1, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(from var(--brand) 0.25 0.03 h / 0.35) 0%, oklch(from var(--brand) 0.2 0.03 h / 0.55) 65%, oklch(from var(--brand) 0.18 0.03 h / 0.7) 100%)', zIndex: 1, pointerEvents: 'none' }} />
             <ElegantCorners />
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(0) }}>
-              <p style={{ fontFamily: fontSans, fontSize: 12, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.95 0.01 330)', margin: '0 0 14px' }}>{t.togetherWithFamilies}</p>
-              <h1 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(40px,11vw,72px)', lineHeight: 1.05, color: 'oklch(0.99 0.005 0)', margin: 0 }}>{COUPLE_NAMES[lang]}</h1>
-              <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(0.92 0.01 330)', margin: '12px 0 0' }}>{t.honorRequest}</p>
-              <div style={{ width: 40, height: 1, background: 'oklch(0.9 0.02 330 / 0.7)', margin: '18px 0' }} />
-              <p style={{ fontFamily: fontSans, fontSize: 15, letterSpacing: '0.08em', color: 'oklch(0.98 0.005 0)', margin: 0 }}>{WEDDING_DATE_LONG[lang]}</p>
-              <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(0.9 0.01 330)', margin: '5px 0 0' }}>{VENUE_NAME[lang]}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 12, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.95 0.01 h)', margin: '0 0 14px' }}>{t.togetherWithFamilies}</p>
+              <h1 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(40px,11vw,72px)', lineHeight: 1.05, color: 'oklch(var(--color-paper))', margin: 0 }}>{COUPLE_NAMES[lang]}</h1>
+              <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(from var(--brand) 0.92 0.01 h)', margin: '12px 0 0' }}>{t.honorRequest}</p>
+              <div style={{ width: 40, height: 1, background: 'oklch(from var(--brand) 0.9 0.02 h / 0.7)', margin: '18px 0' }} />
+              <p style={{ fontFamily: fontSans, fontSize: 15, letterSpacing: '0.08em', color: 'oklch(var(--color-paper))', margin: 0 }}>{WEDDING_DATE_LONG[lang]}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(from var(--brand) 0.9 0.01 h)', margin: '5px 0 0' }}>{VENUE_NAME[lang]}</p>
             </div>
             <div style={{ position: 'absolute', bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, animation: 'bounceDown 2.2s ease-in-out infinite', zIndex: 2 }}>
-              <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.25em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.95 0.01 330)' }}>{t.scroll}</span>
-              <div style={{ width: 1, height: 20, background: 'oklch(0.95 0.01 330 / 0.7)' }} />
+              <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.25em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.95 0.01 h)' }}>{t.scroll}</span>
+              <div style={{ width: 1, height: 20, background: 'oklch(from var(--brand) 0.95 0.01 h / 0.7)' }} />
             </div>
           </section>
 
           {/* Date */}
-          <section data-screen-label="Date" className="page" style={{ background: 'linear-gradient(160deg, oklch(0.96 0.02 300) 0%, oklch(0.94 0.03 320) 100%)' }}>
+          <section data-screen-label="Date" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.96 0.02 h) 0%, oklch(from var(--brand) 0.94 0.03 h) 100%)' }}>
             <RoseCorners />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(1) }}>
-              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.45 0.07 310)', margin: '0 0 20px' }}>{t.saveTheDate}</p>
-              <h2 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(64px,22vw,140px)', lineHeight: 0.9, color: 'oklch(0.28 0.03 310)', margin: 0 }}>{t.dateDay}</h2>
-              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(26px,6vw,38px)', color: 'oklch(0.35 0.04 310)', margin: '10px 0 0' }}>{t.dateMonthYear}</p>
-              <p style={{ fontFamily: fontSans, fontSize: 14, letterSpacing: '0.2em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.45 0.05 320)', margin: '14px 0 0' }}>{t.ceremonyTime}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 20px' }}>{t.saveTheDate}</p>
+              <h2 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(64px,22vw,140px)', lineHeight: 0.9, color: 'oklch(from var(--brand) 0.28 0.03 h)', margin: 0 }}>{t.dateDay}</h2>
+              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(26px,6vw,38px)', color: 'oklch(from var(--brand) 0.35 0.04 h)', margin: '10px 0 0' }}>{t.dateMonthYear}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 14, letterSpacing: '0.2em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.05 h)', margin: '14px 0 0' }}>{t.ceremonyTime}</p>
               <div style={{ display: 'flex', gap: 14, marginTop: 40 }}>
                 {countdownParts.map((part) => (
                   <div key={part.labelKey} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 50 }}>
-                    <span style={{ fontFamily: fontSerif, fontSize: 32, color: 'oklch(0.3 0.05 320)' }}>{part.value}</span>
-                    <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.5 0.03 320)', marginTop: 4 }}>{t[part.labelKey]}</span>
+                    <span style={{ fontFamily: fontSerif, fontSize: 32, color: 'oklch(from var(--brand) 0.3 0.05 h)' }}>{part.value}</span>
+                    <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.5 0.03 h)', marginTop: 4 }}>{t[part.labelKey]}</span>
                   </div>
                 ))}
               </div>
-              <p style={{ fontFamily: fontSans, fontSize: 15, color: 'oklch(0.42 0.03 320)', marginTop: 38, maxWidth: 340, lineHeight: 1.6 }}>{t.honoredPresence}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 15, color: 'oklch(from var(--brand) 0.42 0.03 h)', marginTop: 38, maxWidth: 340, lineHeight: 1.6 }}>{t.honoredPresence}</p>
             </div>
           </section>
 
           {/* Venue */}
-          <section data-screen-label="Venue" className="page" style={{ color: 'oklch(0.98 0.005 0)' }}>
+          <section data-screen-label="Venue" className="page" style={{ color: 'oklch(var(--color-paper))' }}>
             <img src="/assets/venue-bw.jpg" alt={VENUE_NAME[lang]} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(0.25 0.03 330 / 0.35) 0%, oklch(0.2 0.03 330 / 0.55) 65%, oklch(0.18 0.03 330 / 0.7) 100%)', zIndex: 1, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(from var(--brand) 0.25 0.03 h / 0.35) 0%, oklch(from var(--brand) 0.2 0.03 h / 0.55) 65%, oklch(from var(--brand) 0.18 0.03 h / 0.7) 100%)', zIndex: 1, pointerEvents: 'none' }} />
             <ElegantCorners />
             <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(2) }}>
-              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.95 0.01 330)', margin: '0 0 20px' }}>{t.theVenue}</p>
-              <h2 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(30px,7vw,44px)', color: 'oklch(0.99 0.005 0)', margin: '0 0 14px', lineHeight: 1.15 }}>{VENUE_NAME[lang]}</h2>
-              <p style={{ fontFamily: fontSans, fontSize: 15, color: 'oklch(0.92 0.01 330)', margin: '0 0 28px', maxWidth: 320, lineHeight: 1.6 }}>{VENUE_ADDRESS[lang]}</p>
-              <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(0.95 0.01 330 / 0.8)', borderRadius: 30, padding: '12px 30px', color: 'oklch(0.98 0.005 0)' }}>{t.viewOnMap}</a>
+              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.95 0.01 h)', margin: '0 0 20px' }}>{t.theVenue}</p>
+              <h2 style={{ fontFamily: fontSerif, fontWeight: 500, fontSize: 'clamp(30px,7vw,44px)', color: 'oklch(var(--color-paper))', margin: '0 0 14px', lineHeight: 1.15 }}>{VENUE_NAME[lang]}</h2>
+              <p style={{ fontFamily: fontSans, fontSize: 15, color: 'oklch(from var(--brand) 0.92 0.01 h)', margin: '0 0 28px', maxWidth: 320, lineHeight: 1.6 }}>{VENUE_ADDRESS[lang]}</p>
+              <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(from var(--brand) 0.95 0.01 h / 0.8)', borderRadius: 30, padding: '12px 30px', color: 'oklch(var(--color-paper))' }}>{t.viewOnMap}</a>
             </div>
           </section>
 
           {/* Registry */}
-          <section data-screen-label="Registry" className="page" style={{ background: 'linear-gradient(160deg, oklch(0.94 0.03 320) 0%, oklch(0.96 0.02 300) 100%)' }}>
+          <section data-screen-label="Registry" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.94 0.03 h) 0%, oklch(from var(--brand) 0.96 0.02 h) 100%)' }}>
             <RoseCorners />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(3) }}>
-              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.45 0.07 310)', margin: '0 0 16px' }}>{t.registryTitle}</p>
-              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(0.32 0.03 320)', lineHeight: 1.5, maxWidth: 340, margin: '0 0 30px' }}>
+              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 16px' }}>{t.registryTitle}</p>
+              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.5, maxWidth: 340, margin: '0 0 30px' }}>
                 {t.registryText}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: 'min(300px,84vw)' }}>
                 {GIFT_OPTIONS.map((opt) => (
-                  <div key={opt.key} style={{ position: 'relative', background: 'oklch(0.99 0.005 320)', border: '1px solid oklch(0.85 0.02 320)', borderRadius: 10, padding: '16px 18px', textAlign: 'left', overflow: 'hidden' }}>
+                  <div key={opt.key} style={{ position: 'relative', background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.85 0.02 h)', borderRadius: 10, padding: '16px 18px', textAlign: 'left', overflow: 'hidden' }}>
                     <img src="/assets/corner-vine.png" alt="" style={{ position: 'absolute', bottom: -1, right: -1, width: 64, height: 'auto', opacity: 0.55, pointerEvents: 'none' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 6px' }}>
                       {opt.showLogo && <img src="/assets/whish-logo.png" alt="Whish Money" style={{ width: 72, height: 22, objectFit: 'contain', flexShrink: 0 }} />}
-                      <p style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.5 0.04 320)', margin: 0 }}>{t[opt.labelKey]}</p>
+                      <p style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.5 0.04 h)', margin: 0 }}>{t[opt.labelKey]}</p>
                     </div>
-                    <p dir="ltr" style={{ fontFamily: "'Courier New',monospace", fontSize: 18, color: 'oklch(0.28 0.03 320)', margin: '0 0 10px', letterSpacing: '0.04em', position: 'relative', textAlign: 'left' }}>{opt.value}</p>
+                    <p dir="ltr" style={{ fontFamily: "'Courier New',monospace", fontSize: 18, color: 'oklch(from var(--brand) 0.28 0.03 h)', margin: '0 0 10px', letterSpacing: '0.04em', position: 'relative', textAlign: 'left' }}>{opt.value}</p>
                     <button
                       onClick={() => copyValue(opt.key, opt.value.replace(/\s/g, ''))}
-                      style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', border: '1px solid oklch(0.6 0.06 325)', borderRadius: 20, padding: '7px 16px', color: 'oklch(0.4 0.06 325)', cursor: 'pointer', position: 'relative' }}
+                      style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', border: '1px solid oklch(from var(--brand) 0.6 0.06 h)', borderRadius: 20, padding: '7px 16px', color: 'oklch(from var(--brand) 0.4 0.06 h)', cursor: 'pointer', position: 'relative' }}
                     >
                       {copiedKey === opt.key ? t.copied : t.copy}
                     </button>
@@ -474,29 +474,29 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
           </section>
 
           {/* RSVP */}
-          <section data-screen-label="RSVP" className="page" style={{ background: 'linear-gradient(160deg, oklch(0.94 0.03 320) 0%, oklch(0.96 0.02 300) 100%)' }}>
+          <section data-screen-label="RSVP" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.94 0.03 h) 0%, oklch(from var(--brand) 0.96 0.02 h) 100%)' }}>
             <RoseCorners />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(4) }}>
-            <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(0.45 0.07 310)', margin: '0 0 18px' }}>{t.rsvp}</p>
+            <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 18px' }}>{t.rsvp}</p>
             {guest ? (
               <>
-                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(0.3 0.03 320)', margin: '0 0 26px', maxWidth: 340, lineHeight: 1.4 }}>
+                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 26px', maxWidth: 340, lineHeight: 1.4 }}>
                   {t.willJoin(guest.name)}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 'min(320px,86vw)' }}>
                   {guest.members.map((member) => (
-                    <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'oklch(0.99 0.005 320)', border: '1px solid oklch(0.85 0.02 320)', borderRadius: 10, padding: '10px 14px' }}>
-                      <span style={{ fontFamily: fontSans, fontSize: 14, color: 'oklch(0.3 0.03 320)' }}>{member.name}</span>
+                    <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.85 0.02 h)', borderRadius: 10, padding: '10px 14px' }}>
+                      <span style={{ fontFamily: fontSans, fontSize: 14, color: 'oklch(from var(--brand) 0.3 0.03 h)' }}>{member.name}</span>
                       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                         <button
                           onClick={() => { setMemberChoices((c) => ({ ...c, [member.id]: 'yes' })); setRsvpSaved(false); }}
-                          style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(0.55 0.08 325)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'yes' ? 'oklch(0.55 0.08 325)' : 'none', color: memberChoices[member.id] === 'yes' ? 'oklch(0.99 0.005 0)' : 'oklch(0.4 0.06 325)' }}
+                          style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(from var(--brand) 0.55 0.08 h)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'yes' ? 'oklch(from var(--brand) 0.55 0.08 h)' : 'none', color: memberChoices[member.id] === 'yes' ? 'oklch(var(--color-paper))' : 'oklch(from var(--brand) 0.4 0.06 h)' }}
                         >
                           {t.yes}
                         </button>
                         <button
                           onClick={() => { setMemberChoices((c) => ({ ...c, [member.id]: 'no' })); setRsvpSaved(false); }}
-                          style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(0.6 0.06 325)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'no' ? 'oklch(0.5 0.05 325)' : 'none', color: memberChoices[member.id] === 'no' ? 'oklch(0.99 0.005 0)' : 'oklch(0.4 0.06 325)' }}
+                          style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', border: '1px solid oklch(from var(--brand) 0.6 0.06 h)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'no' ? 'oklch(from var(--brand) 0.5 0.05 h)' : 'none', color: memberChoices[member.id] === 'no' ? 'oklch(var(--color-paper))' : 'oklch(from var(--brand) 0.4 0.06 h)' }}
                         >
                           {t.no}
                         </button>
@@ -507,30 +507,30 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
                 <button
                   onClick={submitRsvp}
                   disabled={!allMembersAnswered || rsvpSaving}
-                  style={{ marginTop: 22, fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: !allMembersAnswered || rsvpSaving ? 'oklch(0.8 0.02 320)' : 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '14px 36px', cursor: !allMembersAnswered || rsvpSaving ? 'not-allowed' : 'pointer' }}
+                  style={{ marginTop: 22, fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: !allMembersAnswered || rsvpSaving ? 'oklch(from var(--brand) 0.8 0.02 h)' : 'oklch(from var(--brand) 0.55 0.08 h)', color: 'oklch(var(--color-paper))', border: 'none', borderRadius: 30, padding: '14px 36px', cursor: !allMembersAnswered || rsvpSaving ? 'not-allowed' : 'pointer' }}
                 >
                   {rsvpSaving ? t.saving : t.saveRsvp}
                 </button>
                 {!allMembersAnswered && (
-                  <p style={{ fontFamily: fontSans, fontSize: 12, color: 'oklch(0.5 0.03 320)', marginTop: 12 }}>{t.answerEveryone}</p>
+                  <p style={{ fontFamily: fontSans, fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', marginTop: 12 }}>{t.answerEveryone}</p>
                 )}
                 {rsvpError && (
-                  <p style={{ fontFamily: fontSans, fontSize: 12, color: 'oklch(0.5 0.15 25)', marginTop: 12 }}>{rsvpError}</p>
+                  <p style={{ fontFamily: fontSans, fontSize: 12, color: 'oklch(var(--color-danger))', marginTop: 12 }}>{rsvpError}</p>
                 )}
                 {rsvpSaved && !rsvpError && (
-                  <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 18, color: 'oklch(0.35 0.06 325)', marginTop: 14 }}>{t.rsvpSaved}</p>
+                  <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 18, color: 'oklch(from var(--brand) 0.35 0.06 h)', marginTop: 14 }}>{t.rsvpSaved}</p>
                 )}
               </>
             ) : !rsvpChoice ? (
               <>
-                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(0.3 0.03 320)', margin: '0 0 30px', maxWidth: 320, lineHeight: 1.4 }}>{t.willYouJoin}</p>
+                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 30px', maxWidth: 320, lineHeight: 1.4 }}>{t.willYouJoin}</p>
                 <div style={{ display: 'flex', gap: 16 }}>
-                  <button onClick={() => setRsvpChoice('yes')} style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '14px 32px', cursor: 'pointer' }}>{t.yes}</button>
-                  <button onClick={() => setRsvpChoice('no')} style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', color: 'oklch(0.4 0.06 325)', border: '1px solid oklch(0.6 0.06 325)', borderRadius: 30, padding: '14px 32px', cursor: 'pointer' }}>{t.no}</button>
+                  <button onClick={() => setRsvpChoice('yes')} style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'oklch(from var(--brand) 0.55 0.08 h)', color: 'oklch(var(--color-paper))', border: 'none', borderRadius: 30, padding: '14px 32px', cursor: 'pointer' }}>{t.yes}</button>
+                  <button onClick={() => setRsvpChoice('no')} style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.1em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', color: 'oklch(from var(--brand) 0.4 0.06 h)', border: '1px solid oklch(from var(--brand) 0.6 0.06 h)', borderRadius: 30, padding: '14px 32px', cursor: 'pointer' }}>{t.no}</button>
                 </div>
               </>
             ) : (
-              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(0.3 0.03 320)', margin: 0, maxWidth: 320, lineHeight: 1.4 }}>
+              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0, maxWidth: 320, lineHeight: 1.4 }}>
                 {rsvpChoice === 'yes' ? t.yesResponse : t.noResponse}
               </p>
             )}
@@ -538,20 +538,20 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
           </section>
 
           {/* Closing */}
-          <section data-screen-label="Closing" className="page" style={{ background: 'linear-gradient(160deg, oklch(0.93 0.03 320) 0%, oklch(0.95 0.025 350) 100%)' }}>
+          <section data-screen-label="Closing" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.93 0.03 h) 0%, oklch(from var(--brand) 0.95 0.025 h) 100%)' }}>
             <RoseCorners />
             <div style={{ position: 'relative', width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(5) }}>
-              <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 10, fontFamily: fontSerif, fontSize: 88, lineHeight: 1, color: 'oklch(0.62 0.06 320)', pointerEvents: 'none' }}>&ldquo;</span>
+              <span aria-hidden="true" style={{ position: 'absolute', left: 0, top: 10, fontFamily: fontSerif, fontSize: 88, lineHeight: 1, color: 'oklch(from var(--brand) 0.62 0.06 h)', pointerEvents: 'none' }}>&ldquo;</span>
               <img src="/assets/closing-photo.jpg" alt={COUPLE_NAMES[lang]} style={{ width: 110, height: 110, borderRadius: '50%', objectFit: 'cover', marginBottom: 28, filter: 'grayscale(100%)' }} />
-              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(0.32 0.03 320)', lineHeight: 1.5, margin: '0 0 24px' }}>
+              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.5, margin: '0 0 24px' }}>
                 {t.closingQuote}
               </p>
-              <p style={{ fontFamily: fontSans, fontSize: 16, letterSpacing: '0.1em', color: 'oklch(0.4 0.04 320)', margin: 0 }}>{COUPLE_NAMES[lang]}</p>
-              <p style={{ fontFamily: fontSans, fontSize: 12, letterSpacing: '0.08em', color: 'oklch(0.5 0.03 320)', marginTop: 8 }}>{WEDDING_DATE_LONG[lang]}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 16, letterSpacing: '0.1em', color: 'oklch(from var(--brand) 0.4 0.04 h)', margin: 0 }}>{COUPLE_NAMES[lang]}</p>
+              <p style={{ fontFamily: fontSans, fontSize: 12, letterSpacing: '0.08em', color: 'oklch(from var(--brand) 0.5 0.03 h)', marginTop: 8 }}>{WEDDING_DATE_LONG[lang]}</p>
               {showKidsMessage && (
-                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 15, color: 'oklch(0.45 0.05 320)', marginTop: 18 }}>{t.sweetDreams}</p>
+                <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 15, color: 'oklch(from var(--brand) 0.45 0.05 h)', marginTop: 18 }}>{t.sweetDreams}</p>
               )}
-              <span aria-hidden="true" style={{ position: 'absolute', right: 0, bottom: -20, fontFamily: fontSerif, fontSize: 88, lineHeight: 1, color: 'oklch(0.62 0.06 320)', pointerEvents: 'none' }}>&rdquo;</span>
+              <span aria-hidden="true" style={{ position: 'absolute', right: 0, bottom: -20, fontFamily: fontSerif, fontSize: 88, lineHeight: 1, color: 'oklch(from var(--brand) 0.62 0.06 h)', pointerEvents: 'none' }}>&rdquo;</span>
             </div>
           </section>
         </div>
@@ -563,7 +563,7 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
               onClick={() => goTo(i)}
               style={{
                 width: 7, height: 7, borderRadius: '50%', border: 'none', cursor: 'pointer', padding: 0,
-                background: activeIndex === i ? 'oklch(0.5 0.08 330)' : 'oklch(0.75 0.03 320)',
+                background: activeIndex === i ? 'oklch(from var(--brand) 0.5 0.08 h)' : 'oklch(from var(--brand) 0.75 0.03 h)',
               }}
             />
           ))}
