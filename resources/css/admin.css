@@ -1,0 +1,139 @@
+.admin-shell {
+  min-height: 100svh;
+  width: 100%;
+  background: oklch(0.985 0.008 320);
+  box-sizing: border-box;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100svh;
+  align-items: stretch;
+}
+
+.admin-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  background: oklch(0.99 0.005 320);
+  border-right: 1px solid oklch(0.9 0.015 320);
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  box-sizing: border-box;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.admin-sidebar-signout {
+  margin-top: auto;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 16px 60px;
+  box-sizing: border-box;
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.invitations-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid oklch(0.87 0.015 320);
+  border-radius: 12px;
+  background: oklch(0.99 0.005 320);
+}
+
+.invitations-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.invitations-table th {
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: oklch(0.5 0.03 320);
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid oklch(0.87 0.015 320);
+  white-space: nowrap;
+}
+
+.invitations-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid oklch(0.93 0.01 320);
+  vertical-align: middle;
+}
+
+.invitations-table tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 880px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-sidebar-brand {
+    flex-shrink: 0;
+  }
+
+  .admin-sidebar-nav {
+    flex-direction: row;
+    flex: none;
+  }
+
+  .admin-sidebar-signout {
+    margin-top: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .admin-sidebar-signout button {
+    width: auto;
+  }
+}

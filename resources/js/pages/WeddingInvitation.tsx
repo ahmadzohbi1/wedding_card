@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { getCsrfToken } from '../lib/csrf';
 
 declare global {
   interface Window {
@@ -7,17 +8,41 @@ declare global {
   }
 }
 
+type RsvpStatus = 'pending' | 'yes' | 'no';
+
+type GuestMember = {
+  id: number;
+  name: string;
+  is_primary: boolean;
+  rsvp_status: RsvpStatus;
+};
+
+export type GuestData = {
+  slug: string;
+  name: string;
+  members: GuestMember[];
+};
+
 const COUPLE_NAMES = 'Layla & Ahmad';
 const WEDDING_DATE_LONG = 'Thursday, September 24, 2026';
+const WEDDING_DATE_TARGET = new Date(2026, 8, 24, 20, 0, 0);
 const VENUE_NAME = 'Roche Doree';
 const VENUE_ADDRESS = 'Roche Doree — address to follow';
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(VENUE_NAME)}`;
 
-const COUNTDOWN_PARTS = [
-  { value: '46', label: 'Days' },
-  { value: '6', label: 'Weeks' },
-  { value: 'Thu', label: 'Day' },
-];
+function getCountdownParts(now: Date) {
+  const diffMs = Math.max(0, WEDDING_DATE_TARGET.getTime() - now.getTime());
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalDays = Math.floor(totalHours / 24);
+
+  return [
+    { value: Math.floor(totalDays / 7), label: 'Weeks' },
+    { value: totalDays % 7, label: 'Days' },
+    { value: totalHours % 24, label: 'Hours' },
+    { value: totalMinutes % 60, label: 'Mins' },
+  ];
+}
 
 const GIFT_OPTIONS = [
   { key: 'phone', label: 'Whish Account', value: '+961 71 835 077', showLogo: true },
@@ -49,7 +74,7 @@ function ElegantCorners() {
   );
 }
 
-export default function WeddingInvitationPage() {
+export default function WeddingInvitationPage({ guest, showKidsMessage = true }: { guest?: GuestData; showKidsMessage?: boolean }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const ytPlayerRef = useRef<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -58,6 +83,53 @@ export default function WeddingInvitationPage() {
   const [rsvpChoice, setRsvpChoice] = useState<'yes' | 'no' | null>(null);
   const [entered, setEntered] = useState(false);
   const [gateVisible, setGateVisible] = useState(true);
+
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const countdownParts = useMemo(() => getCountdownParts(now), [now]);
+
+  const [memberChoices, setMemberChoices] = useState<Record<number, 'yes' | 'no' | undefined>>(() =>
+    Object.fromEntries((guest?.members ?? []).map((m) => [m.id, m.rsvp_status === 'pending' ? undefined : m.rsvp_status])),
+  );
+  const [rsvpSaving, setRsvpSaving] = useState(false);
+  const [rsvpError, setRsvpError] = useState<string | null>(null);
+  const [rsvpSaved, setRsvpSaved] = useState(false);
+
+  const allMembersAnswered = useMemo(
+    () => (guest?.members ?? []).every((m) => memberChoices[m.id] !== undefined),
+    [guest, memberChoices],
+  );
+
+  const submitRsvp = async () => {
+    if (!guest) return;
+    setRsvpSaving(true);
+    setRsvpError(null);
+    try {
+      const responses = guest.members
+        .filter((m) => memberChoices[m.id] !== undefined)
+        .map((m) => ({ member_id: m.id, status: memberChoices[m.id] }));
+
+      const res = await fetch(`/rsvp/${guest.slug}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
+        },
+        body: JSON.stringify({ responses }),
+      });
+
+      if (!res.ok) throw new Error('Request failed');
+      setRsvpSaved(true);
+    } catch {
+      setRsvpError("Something went wrong — please try again.");
+    } finally {
+      setRsvpSaving(false);
+    }
+  };
 
   useEffect(() => {
     const init = () => {
@@ -158,7 +230,7 @@ export default function WeddingInvitationPage() {
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, oklch(0.25 0.03 320 / 0.55) 0%, oklch(0.2 0.03 320 / 0.65) 65%, oklch(0.18 0.03 320 / 0.75) 100%)', zIndex: 1 }} />
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.98 0.005 0)', margin: '0 0 24px' }}>Dear Guest</p>
+            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.98 0.005 0)', margin: '0 0 24px' }}>Dear {guest?.name ?? 'Guest'}</p>
             <button
               onClick={handleEnter}
               style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', background: 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '16px 40px', cursor: 'pointer' }}
@@ -202,15 +274,15 @@ export default function WeddingInvitationPage() {
           <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 'clamp(64px,22vw,140px)', lineHeight: 0.9, color: 'oklch(0.28 0.03 310)', margin: 0 }}>24</h2>
           <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 'clamp(26px,6vw,38px)', color: 'oklch(0.35 0.04 310)', margin: '10px 0 0' }}>September 2026</p>
           <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'oklch(0.45 0.05 320)', margin: '14px 0 0' }}>08:00 PM</p>
-          <div style={{ display: 'flex', gap: 22, marginTop: 40 }}>
-            {COUNTDOWN_PARTS.map((part) => (
-              <div key={part.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 56 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 34, color: 'oklch(0.3 0.05 320)' }}>{part.value}</span>
+          <div style={{ display: 'flex', gap: 14, marginTop: 40 }}>
+            {countdownParts.map((part) => (
+              <div key={part.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 50 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 32, color: 'oklch(0.3 0.05 320)' }}>{part.value}</span>
                 <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.5 0.03 320)', marginTop: 4 }}>{part.label}</span>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 15, color: 'oklch(0.42 0.03 320)', marginTop: 38, maxWidth: 340, lineHeight: 1.6 }}>We would be honored by your presence as we exchange our vows.</p>
+          <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 15, color: 'oklch(0.42 0.03 320)', marginTop: 38, maxWidth: 340, lineHeight: 1.6 }}>We would be honored by your presence at our wedding.</p>
         </section>
 
         {/* Venue */}
@@ -257,7 +329,50 @@ export default function WeddingInvitationPage() {
         <section data-screen-label="RSVP" className="page" style={{ background: 'linear-gradient(160deg, oklch(0.94 0.03 320) 0%, oklch(0.96 0.02 300) 100%)' }}>
           <RoseCorners />
           <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.3em', textTransform: 'uppercase', color: 'oklch(0.45 0.07 310)', margin: '0 0 18px' }}>RSVP</p>
-          {!rsvpChoice ? (
+          {guest ? (
+            <>
+              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(0.3 0.03 320)', margin: '0 0 26px', maxWidth: 340, lineHeight: 1.4 }}>
+                Will {guest.name} and party be joining us?
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 'min(320px,86vw)' }}>
+                {guest.members.map((member) => (
+                  <div key={member.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, background: 'oklch(0.99 0.005 320)', border: '1px solid oklch(0.85 0.02 320)', borderRadius: 10, padding: '10px 14px' }}>
+                    <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(0.3 0.03 320)', textAlign: 'left' }}>{member.name}</span>
+                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                      <button
+                        onClick={() => { setMemberChoices((c) => ({ ...c, [member.id]: 'yes' })); setRsvpSaved(false); }}
+                        style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid oklch(0.55 0.08 325)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'yes' ? 'oklch(0.55 0.08 325)' : 'none', color: memberChoices[member.id] === 'yes' ? 'oklch(0.99 0.005 0)' : 'oklch(0.4 0.06 325)' }}
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => { setMemberChoices((c) => ({ ...c, [member.id]: 'no' })); setRsvpSaved(false); }}
+                        style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', border: '1px solid oklch(0.6 0.06 325)', borderRadius: 20, padding: '6px 14px', cursor: 'pointer', background: memberChoices[member.id] === 'no' ? 'oklch(0.5 0.05 325)' : 'none', color: memberChoices[member.id] === 'no' ? 'oklch(0.99 0.005 0)' : 'oklch(0.4 0.06 325)' }}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={submitRsvp}
+                disabled={!allMembersAnswered || rsvpSaving}
+                style={{ marginTop: 22, fontFamily: "'Jost',sans-serif", fontSize: 13, letterSpacing: '0.1em', textTransform: 'uppercase', background: !allMembersAnswered || rsvpSaving ? 'oklch(0.8 0.02 320)' : 'oklch(0.55 0.08 325)', color: 'oklch(0.99 0.005 0)', border: 'none', borderRadius: 30, padding: '14px 36px', cursor: !allMembersAnswered || rsvpSaving ? 'not-allowed' : 'pointer' }}
+              >
+                {rsvpSaving ? 'Saving…' : 'Save RSVP'}
+              </button>
+              {!allMembersAnswered && (
+                <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(0.5 0.03 320)', marginTop: 12 }}>Please answer for everyone in your party.</p>
+              )}
+              {rsvpError && (
+                <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(0.5 0.15 25)', marginTop: 12 }}>{rsvpError}</p>
+              )}
+              {rsvpSaved && !rsvpError && (
+                <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 18, color: 'oklch(0.35 0.06 325)', marginTop: 14 }}>Thank you — your response has been saved. You can update it anytime.</p>
+              )}
+            </>
+          ) : !rsvpChoice ? (
             <>
               <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 'clamp(22px,5.5vw,30px)', color: 'oklch(0.3 0.03 320)', margin: '0 0 30px', maxWidth: 320, lineHeight: 1.4 }}>Will you be joining us?</p>
               <div style={{ display: 'flex', gap: 16 }}>
@@ -283,6 +398,9 @@ export default function WeddingInvitationPage() {
             </p>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 16, letterSpacing: '0.1em', color: 'oklch(0.4 0.04 320)', margin: 0 }}>{COUPLE_NAMES}</p>
             <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, letterSpacing: '0.08em', color: 'oklch(0.5 0.03 320)', marginTop: 8 }}>{WEDDING_DATE_LONG}</p>
+            {showKidsMessage && (
+              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: 15, color: 'oklch(0.45 0.05 320)', marginTop: 18 }}>Sweet dreams for your kids</p>
+            )}
             <span aria-hidden="true" style={{ position: 'absolute', right: 0, bottom: -20, fontFamily: "'Cormorant Garamond',serif", fontSize: 88, lineHeight: 1, color: 'oklch(0.62 0.06 320)', pointerEvents: 'none' }}>&rdquo;</span>
           </div>
         </section>

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysql -u root -h 127.0.0.1 -e \"CREATE DATABASE IF NOT EXISTS wedding_card CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\")",
+      "Bash(mysql -u root -h 127.0.0.1 -e \"SHOW DATABASES LIKE 'wedding_card';\")",
+      "Bash(php -m)",
+      "Bash(mysql -u root -h 127.0.0.1 wedding_card -e \"SHOW TABLES; SELECT id,name,email FROM users;\")",
+      "Bash(mysql -u root -h 127.0.0.1 wedding_card -e \"DELETE FROM guest_members; DELETE FROM guests;\")",
+      "Bash(node -e ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(mysql -u root -h 127.0.0.1 wedding_card -e \"SELECT id, name, slug FROM guests ORDER BY id;\")",
+      "Bash(mysql -u root -h 127.0.0.1 wedding_card -e \"SELECT g.name AS guest, gm.name AS member, gm.rsvp_status FROM guests g JOIN guest_members gm ON gm.guest_id = g.id ORDER BY g.id, gm.id;\")",
+      "Bash(mysql -u root -h 127.0.0.1 wedding_card -e \"SELECT id, name FROM guests ORDER BY id;\")",
+      "Bash(python3 -c \"import cairosvg\")",
+      "Bash(node -e \"require\\('sharp'\\)\")",
+      "Bash(brew list *)",
+      "Bash(python3 -c \"import PIL; print\\('PIL ok'\\)\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 5 https://registry.npmjs.org/)",
+      "Bash(npx --yes -p playwright node -e ' *)",
+      "Bash(cp /private/tmp/claude-501/claude/og-image.png /Users/ahmadalzohbi/Desktop/Projects/wedding_card/public/assets/og-image.png *)",
+      "Bash(curl -s -o /dev/null -w \"logo-light.svg: %{http_code}\\\\n\" http://127.0.0.1:8123/assets/logo-light.svg)",
+      "Bash(curl -s -o /dev/null -w \"logo-dark.svg: %{http_code}\\\\n\" http://127.0.0.1:8123/assets/logo-dark.svg)",
+      "Bash(curl -s -o /dev/null -w \"og-image.png: %{http_code}\\\\n\" http://127.0.0.1:8123/assets/og-image.png)",
+      "Bash(curl -s http://127.0.0.1:8123/admin/getin)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/claude-501/claude"
+    ]
+  }
+}
