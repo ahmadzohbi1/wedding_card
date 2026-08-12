@@ -58,6 +58,7 @@ const TRANSLATIONS = {
     copy: 'Copy',
     copied: 'Copied',
     rsvp: 'RSVP',
+    rsvpDeadline: 'Please submit before 15/09 so we can make sure who is coming and who is not.',
     willJoin: (name: string) => `Will ${name} and party be joining us?`,
     yes: 'Yes',
     no: 'No',
@@ -100,6 +101,7 @@ const TRANSLATIONS = {
     copy: 'نسخ',
     copied: 'تم النسخ',
     rsvp: 'تأكيد الحضور',
+    rsvpDeadline: 'يرجى تأكيد الحضور قبل 15/09 حتى نتمكن من معرفة الحاضرين والمعتذرين.',
     willJoin: (name: string) => `هل سينضم ${name} ومرافقوه إلينا؟`,
     yes: 'نعم',
     no: 'لا',
@@ -466,40 +468,12 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
             </div>
           </section>
 
-          {/* Registry */}
-          <section data-screen-label="Registry" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.94 0.03 h) 0%, oklch(from var(--brand) 0.96 0.02 h) 100%)' }}>
-            <RoseCorners />
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(3) }}>
-              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 16px' }}>{t.registryTitle}</p>
-              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.5, maxWidth: 340, margin: '0 0 30px' }}>
-                {t.registryText}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: 'min(300px,84vw)' }}>
-                {GIFT_OPTIONS.map((opt) => (
-                  <div key={opt.key} style={{ position: 'relative', background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.85 0.02 h)', borderRadius: 10, padding: '16px 18px', textAlign: 'left', overflow: 'hidden' }}>
-                    <img src="/assets/corner-vine.png" alt="" style={{ position: 'absolute', bottom: -1, right: -1, width: 64, height: 'auto', opacity: 0.55, pointerEvents: 'none' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 6px' }}>
-                      {opt.showLogo && <img src="/assets/whish-logo.png" alt="Whish Money" style={{ width: 72, height: 22, objectFit: 'contain', flexShrink: 0 }} />}
-                      <p style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.5 0.04 h)', margin: 0 }}>{t[opt.labelKey]}</p>
-                    </div>
-                    <p dir="ltr" style={{ fontFamily: "'Courier New',monospace", fontSize: 18, color: 'oklch(from var(--brand) 0.28 0.03 h)', margin: '0 0 10px', letterSpacing: '0.04em', position: 'relative', textAlign: 'left' }}>{opt.value}</p>
-                    <button
-                      onClick={() => copyValue(opt.key, opt.value.replace(/\s/g, ''))}
-                      style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', border: '1px solid oklch(from var(--brand) 0.6 0.06 h)', borderRadius: 20, padding: '7px 16px', color: 'oklch(from var(--brand) 0.4 0.06 h)', cursor: 'pointer', position: 'relative' }}
-                    >
-                      {copiedKey === opt.key ? t.copied : t.copy}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           {/* RSVP */}
           <section data-screen-label="RSVP" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.94 0.03 h) 0%, oklch(from var(--brand) 0.96 0.02 h) 100%)' }}>
             <RoseCorners />
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(4) }}>
-            <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 18px' }}>{t.rsvp}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(3) }}>
+            <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 10px' }}>{t.rsvp}</p>
+            <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.04 h)', margin: '0 0 18px', maxWidth: 320, lineHeight: 1.5 }}>{t.rsvpDeadline}</p>
             {guest ? (
               <>
                 <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 26px', maxWidth: 340, lineHeight: 1.4 }}>
@@ -556,6 +530,35 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
                 {rsvpChoice === 'yes' ? t.yesResponse : t.noResponse}
               </p>
             )}
+            </div>
+          </section>
+
+          {/* Registry */}
+          <section data-screen-label="Registry" className="page" style={{ background: 'linear-gradient(160deg, oklch(from var(--brand) 0.94 0.03 h) 0%, oklch(from var(--brand) 0.96 0.02 h) 100%)' }}>
+            <RoseCorners />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ...reveal(4) }}>
+              <p style={{ fontFamily: fontSans, fontSize: 13, letterSpacing: '0.3em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.45 0.07 h)', margin: '0 0 16px' }}>{t.registryTitle}</p>
+              <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.5, maxWidth: 340, margin: '0 0 30px' }}>
+                {t.registryText}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: 'min(300px,84vw)' }}>
+                {GIFT_OPTIONS.map((opt) => (
+                  <div key={opt.key} style={{ position: 'relative', background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.85 0.02 h)', borderRadius: 10, padding: '16px 18px', textAlign: 'left', overflow: 'hidden' }}>
+                    <img src="/assets/corner-vine.png" alt="" style={{ position: 'absolute', bottom: -1, right: -1, width: 64, height: 'auto', opacity: 0.55, pointerEvents: 'none' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '0 0 6px' }}>
+                      {opt.showLogo && <img src="/assets/whish-logo.png" alt="Whish Money" style={{ width: 72, height: 22, objectFit: 'contain', flexShrink: 0 }} />}
+                      <p style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.15em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.5 0.04 h)', margin: 0 }}>{t[opt.labelKey]}</p>
+                    </div>
+                    <p dir="ltr" style={{ fontFamily: "'Courier New',monospace", fontSize: 18, color: 'oklch(from var(--brand) 0.28 0.03 h)', margin: '0 0 10px', letterSpacing: '0.04em', position: 'relative', textAlign: 'left' }}>{opt.value}</p>
+                    <button
+                      onClick={() => copyValue(opt.key, opt.value.replace(/\s/g, ''))}
+                      style={{ fontFamily: fontSans, fontSize: 11, letterSpacing: '0.08em', textTransform: lang === 'en' ? 'uppercase' : 'none', background: 'none', border: '1px solid oklch(from var(--brand) 0.6 0.06 h)', borderRadius: 20, padding: '7px 16px', color: 'oklch(from var(--brand) 0.4 0.06 h)', cursor: 'pointer', position: 'relative' }}
+                    >
+                      {copiedKey === opt.key ? t.copied : t.copy}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
