@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class GuestController extends Controller
@@ -23,11 +24,12 @@ class GuestController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'side' => ['required', Rule::in(['groom', 'bride'])],
             'members' => ['array'],
             'members.*' => ['string', 'max:255'],
         ]);
 
-        $guest = $this->createGuestGroup($data['name'], $data['members'] ?? []);
+        $guest = $this->createGuestGroup($data['name'], $data['side'], $data['members'] ?? []);
 
         return response()->json(['guest' => $this->transform($guest)], 201);
     }
@@ -35,6 +37,7 @@ class GuestController extends Controller
     public function bulkStore(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'side' => ['required', Rule::in(['groom', 'bride'])],
             'guests' => ['required', 'array', 'min:1'],
             'guests.*.name' => ['required', 'string', 'max:255'],
             'guests.*.members' => ['array'],
@@ -42,7 +45,7 @@ class GuestController extends Controller
         ]);
 
         $created = DB::transaction(fn () => collect($data['guests'])
-            ->map(fn ($guestData) => $this->createGuestGroup($guestData['name'], $guestData['members'] ?? []))
+            ->map(fn ($guestData) => $this->createGuestGroup($guestData['name'], $data['side'], $guestData['members'] ?? []))
         );
 
         return response()->json(['guests' => $created->map($this->transform(...))], 201);
@@ -52,12 +55,13 @@ class GuestController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'side' => ['required', Rule::in(['groom', 'bride'])],
             'members' => ['array'],
             'members.*.id' => ['nullable', 'integer'],
             'members.*.name' => ['required', 'string', 'max:255'],
         ]);
 
-        $guest->update(['name' => $data['name']]);
+        $guest->update(['name' => $data['name'], 'side' => $data['side']]);
 
         $keepIds = [];
 
@@ -90,7 +94,7 @@ class GuestController extends Controller
 
         return response()->streamDownload(function () use ($guests) {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['Main Guest', 'Invitation Link', 'Guests', 'Accepted', 'Declined', 'Pending', 'Total']);
+            fputcsv($handle, ['Main Guest', 'Side', 'Invitation Link', 'Guests', 'Accepted', 'Declined', 'Pending', 'Total']);
 
             foreach ($guests as $guest) {
                 $membersSummary = $guest->members
@@ -99,6 +103,7 @@ class GuestController extends Controller
 
                 fputcsv($handle, [
                     $guest->name,
+                    ucfirst($guest->side),
                     $guest->url(),
                     $membersSummary,
                     $guest->members->where('rsvp_status', 'yes')->count(),
@@ -114,11 +119,12 @@ class GuestController extends Controller
         ]);
     }
 
-    private function createGuestGroup(string $name, array $members): Guest
+    private function createGuestGroup(string $name, string $side, array $members): Guest
     {
         $guest = Guest::create([
             'name' => $name,
             'slug' => $this->uniqueSlug($name),
+            'side' => $side,
         ]);
 
         $guest->members()->create([
@@ -152,6 +158,7 @@ class GuestController extends Controller
             'id' => $guest->id,
             'name' => $guest->name,
             'slug' => $guest->slug,
+            'side' => $guest->side,
             'url' => $guest->url(),
             'members' => $guest->members->map(fn ($m) => [
                 'id' => $m->id,
