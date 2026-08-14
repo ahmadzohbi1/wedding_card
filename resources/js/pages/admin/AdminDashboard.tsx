@@ -6,6 +6,8 @@ type RsvpStatus = 'pending' | 'yes' | 'no';
 
 type Side = 'groom' | 'bride';
 
+type Gender = 'male' | 'female';
+
 type Member = {
   id: number;
   name: string;
@@ -18,6 +20,7 @@ type GuestGroup = {
   name: string;
   slug: string;
   side: Side;
+  gender: Gender;
   url: string;
   members: Member[];
   counts: { accepted: number; declined: number; pending: number; total: number };
@@ -31,6 +34,8 @@ const SIDE_BADGE_COLOR: Record<Side, { bg: string; fg: string }> = {
   groom: { bg: 'oklch(from var(--brand) 0.9 0.03 h)', fg: 'oklch(from var(--brand) 0.4 0.06 h)' },
   bride: { bg: 'oklch(0.92 0.04 20)', fg: 'oklch(0.5 0.12 20)' },
 };
+
+const GENDER_LABEL: Record<Gender, string> = { male: 'Male', female: 'Female' };
 
 type NavKey = 'overview' | 'invitations' | 'settings';
 
@@ -259,19 +264,35 @@ function SideSelector({ value, onChange }: { value: Side; onChange: (side: Side)
   );
 }
 
+function GenderSelector({ value, onChange }: { value: Gender; onChange: (gender: Gender) => void }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={labelStyle}>Gender</label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {(['male', 'female'] as Gender[]).map((g) => (
+          <button key={g} type="button" onClick={() => onChange(g)} style={sideSelectorBtnStyle(value === g)}>
+            {GENDER_LABEL[g]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function GuestFormModal({ form, defaultSide, saving, error, onCancel, onSubmit }: {
   form: FormState;
   defaultSide: Side;
   saving: boolean;
   error: string | null;
   onCancel: () => void;
-  onSubmit: (name: string, side: Side, members: { id?: number; name: string }[]) => void;
+  onSubmit: (name: string, side: Side, gender: Gender, members: { id?: number; name: string }[]) => void;
 }) {
   const initialName = form.mode === 'edit' ? form.guest.name : '';
   const initialMembers = form.mode === 'edit' ? form.guest.members.filter((m) => !m.is_primary).map((m) => ({ id: m.id, name: m.name })) : [];
 
   const [name, setName] = useState(initialName);
   const [side, setSide] = useState<Side>(form.mode === 'edit' ? form.guest.side : defaultSide);
+  const [gender, setGender] = useState<Gender>(form.mode === 'edit' ? form.guest.gender : 'male');
   const [members, setMembers] = useState(initialMembers);
 
   return (
@@ -279,11 +300,12 @@ function GuestFormModal({ form, defaultSide, saving, error, onCancel, onSubmit }
       <label style={labelStyle}>Main guest name</label>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Moustafa" style={{ ...inputStyle, marginBottom: 14 }} />
       <SideSelector value={side} onChange={setSide} />
+      <GenderSelector value={gender} onChange={setGender} />
       <MemberInputList members={members.map((m) => m.name)} onChange={(names) => setMembers(names.map((n, i) => ({ id: members[i]?.id, name: n })))} />
       {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
       <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
         <button
-          onClick={() => onSubmit(name, side, members.filter((m) => m.name.trim() !== ''))}
+          onClick={() => onSubmit(name, side, gender, members.filter((m) => m.name.trim() !== ''))}
           disabled={saving || !name.trim()}
           style={primaryBtnStyle}
         >
@@ -295,28 +317,28 @@ function GuestFormModal({ form, defaultSide, saving, error, onCancel, onSubmit }
   );
 }
 
-type BulkGuestBlock = { name: string; members: string[] };
+type BulkGuestBlock = { name: string; gender: Gender; members: string[] };
 
 function BulkAddModal({ defaultSide, saving, error, onCancel, onSubmit }: {
   defaultSide: Side;
   saving: boolean;
   error: string | null;
   onCancel: () => void;
-  onSubmit: (guests: { name: string; members: string[] }[], side: Side) => void;
+  onSubmit: (guests: { name: string; gender: Gender; members: string[] }[], side: Side) => void;
 }) {
   const [side, setSide] = useState<Side>(defaultSide);
-  const [blocks, setBlocks] = useState<BulkGuestBlock[]>([{ name: '', members: [''] }]);
+  const [blocks, setBlocks] = useState<BulkGuestBlock[]>([{ name: '', gender: 'male', members: [''] }]);
 
   const updateBlock = (i: number, patch: Partial<BulkGuestBlock>) => {
     setBlocks((bs) => bs.map((b, j) => (j === i ? { ...b, ...patch } : b)));
   };
 
-  const addBlock = () => setBlocks((bs) => [...bs, { name: '', members: [''] }]);
+  const addBlock = () => setBlocks((bs) => [...bs, { name: '', gender: 'male', members: [''] }]);
   const removeBlock = (i: number) => setBlocks((bs) => bs.filter((_, j) => j !== i));
 
   const readyGuests = blocks
     .filter((b) => b.name.trim() !== '')
-    .map((b) => ({ name: b.name.trim(), members: b.members.filter((m) => m.trim() !== '') }));
+    .map((b) => ({ name: b.name.trim(), gender: b.gender, members: b.members.filter((m) => m.trim() !== '') }));
 
   return (
     <Modal title="Bulk add guests" onClose={onCancel} width={560}>
@@ -347,6 +369,7 @@ function BulkAddModal({ defaultSide, saving, error, onCancel, onSubmit }: {
               placeholder="Main guest name, e.g. Moustafa"
               style={{ ...inputStyle, marginBottom: 12 }}
             />
+            <GenderSelector value={block.gender} onChange={(gender) => updateBlock(i, { gender })} />
             <MemberInputList members={block.members} onChange={(members) => updateBlock(i, { members })} />
           </div>
         ))}
@@ -377,8 +400,11 @@ function GuestViewModal({ guest, onClose }: { guest: GuestGroup; onClose: () => 
 
   return (
     <Modal title={guest.name} onClose={onClose}>
-      <span style={{ display: 'inline-block', fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', background: SIDE_BADGE_COLOR[guest.side].bg, color: SIDE_BADGE_COLOR[guest.side].fg, borderRadius: 20, padding: '3px 12px', marginBottom: 10 }}>
+      <span style={{ display: 'inline-block', fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', background: SIDE_BADGE_COLOR[guest.side].bg, color: SIDE_BADGE_COLOR[guest.side].fg, borderRadius: 20, padding: '3px 12px', marginBottom: 10, marginRight: 8 }}>
         {SIDE_LABEL[guest.side]}
+      </span>
+      <span style={{ display: 'inline-block', fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.05em', textTransform: 'uppercase', background: 'oklch(from var(--brand) 0.93 0.01 h)', color: 'oklch(from var(--brand) 0.45 0.03 h)', borderRadius: 20, padding: '3px 12px', marginBottom: 10 }}>
+        {GENDER_LABEL[guest.gender]}
       </span>
       <p style={{ ...labelStyle, marginBottom: 10 }}>
         {guest.counts.total} {guest.counts.total === 1 ? 'guest' : 'guests'} in this party
@@ -526,7 +552,7 @@ export default function AdminDashboard() {
 
   const filteredGuests = sideFilter === 'total' ? guests : guests.filter((g) => g.side === sideFilter);
 
-  const submitForm = async (name: string, side: Side, members: { id?: number; name: string }[]) => {
+  const submitForm = async (name: string, side: Side, gender: Gender, members: { id?: number; name: string }[]) => {
     if (!formState) return;
     setFormSaving(true);
     setFormError(null);
@@ -534,13 +560,13 @@ export default function AdminDashboard() {
       if (formState.mode === 'create') {
         const data = await api('/admin/api/guests', {
           method: 'POST',
-          body: JSON.stringify({ name, side, members: members.map((m) => m.name) }),
+          body: JSON.stringify({ name, side, gender, members: members.map((m) => m.name) }),
         });
         setGuests((g) => [data.guest, ...g]);
       } else {
         const data = await api(`/admin/api/guests/${formState.guest.id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ name, side, members }),
+          body: JSON.stringify({ name, side, gender, members }),
         });
         setGuests((g) => g.map((item) => (item.id === formState.guest.id ? data.guest : item)));
       }
@@ -552,7 +578,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const submitBulk = async (bulkGuests: { name: string; members: string[] }[], side: Side) => {
+  const submitBulk = async (bulkGuests: { name: string; gender: Gender; members: string[] }[], side: Side) => {
     setBulkSaving(true);
     setBulkError(null);
     try {
@@ -653,6 +679,7 @@ export default function AdminDashboard() {
                       <tr>
                         <th>Main guest</th>
                         <th>Side</th>
+                        <th>Gender</th>
                         <th>Party</th>
                         <th>RSVP</th>
                         <th>Link</th>
@@ -667,6 +694,9 @@ export default function AdminDashboard() {
                             <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, background: SIDE_BADGE_COLOR[guest.side].bg, color: SIDE_BADGE_COLOR[guest.side].fg, borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap' }}>
                               {SIDE_LABEL[guest.side]}
                             </span>
+                          </td>
+                          <td style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.45 0.03 h)', whiteSpace: 'nowrap' }}>
+                            {GENDER_LABEL[guest.gender]}
                           </td>
                           <td>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

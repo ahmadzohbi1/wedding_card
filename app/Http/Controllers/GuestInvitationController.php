@@ -16,6 +16,7 @@ class GuestInvitationController extends Controller
             'guest' => [
                 'slug' => $guest->slug,
                 'name' => $guest->name,
+                'gender' => $guest->gender,
                 'members' => $guest->members->map(fn ($member) => [
                     'id' => $member->id,
                     'name' => $member->name,

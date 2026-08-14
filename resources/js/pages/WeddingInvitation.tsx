@@ -10,6 +10,8 @@ declare global {
 
 type RsvpStatus = 'pending' | 'yes' | 'no';
 
+type Gender = 'male' | 'female';
+
 type GuestMember = {
   id: number;
   name: string;
@@ -20,6 +22,7 @@ type GuestMember = {
 export type GuestData = {
   slug: string;
   name: string;
+  gender: Gender;
   members: GuestMember[];
 };
 
@@ -59,7 +62,8 @@ const TRANSLATIONS = {
     copied: 'Copied',
     rsvp: 'RSVP',
     rsvpDeadline: 'Please submit before 15/09 so we can make sure who is coming and who is not.',
-    willJoin: (name: string) => `Will ${name} and party be joining us?`,
+    willJoin: (name: string, gender: Gender, hasFamily: boolean) =>
+      hasFamily ? `Will ${name} and ${gender === 'female' ? 'her' : 'his'} family be joining us?` : `Will ${name} be joining us?`,
     yes: 'Yes',
     no: 'No',
     saveRsvp: 'Save RSVP',
@@ -102,7 +106,10 @@ const TRANSLATIONS = {
     copied: 'تم النسخ',
     rsvp: 'تأكيد الحضور',
     rsvpDeadline: 'يرجى تأكيد الحضور قبل 15/09 حتى نتمكن من معرفة الحاضرين والمعتذرين.',
-    willJoin: (name: string) => `هل سينضم ${name} ومرافقوه إلينا؟`,
+    willJoin: (name: string, gender: Gender, hasFamily: boolean) => {
+      const verb = gender === 'female' ? 'ستنضم' : 'سينضم';
+      return hasFamily ? `هل ${verb} ${name} و${gender === 'female' ? 'عائلتها' : 'عائلته'} إلينا؟` : `هل ${verb} ${name} إلينا؟`;
+    },
     yes: 'نعم',
     no: 'لا',
     saveRsvp: 'حفظ الرد',
@@ -477,7 +484,7 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
             {guest ? (
               <>
                 <p style={{ fontFamily: fontSerif, fontStyle: 'italic', fontSize: 'clamp(20px,5vw,26px)', color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 26px', maxWidth: 340, lineHeight: 1.4 }}>
-                  {t.willJoin(guest.name)}
+                  {t.willJoin(guest.name, guest.gender, guest.members.length > 1)}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 'min(320px,86vw)' }}>
                   {guest.members.map((member) => (

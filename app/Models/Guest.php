@@ -11,6 +11,7 @@ class Guest extends Model
         'name',
         'slug',
         'side',
+        'gender',
     ];
 
     public function getRouteKeyName(): string

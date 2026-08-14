@@ -25,11 +25,12 @@ class GuestController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'side' => ['required', Rule::in(['groom', 'bride'])],
+            'gender' => ['required', Rule::in(['male', 'female'])],
             'members' => ['array'],
             'members.*' => ['string', 'max:255'],
         ]);
 
-        $guest = $this->createGuestGroup($data['name'], $data['side'], $data['members'] ?? []);
+        $guest = $this->createGuestGroup($data['name'], $data['side'], $data['gender'], $data['members'] ?? []);
 
         return response()->json(['guest' => $this->transform($guest)], 201);
     }
@@ -40,12 +41,13 @@ class GuestController extends Controller
             'side' => ['required', Rule::in(['groom', 'bride'])],
             'guests' => ['required', 'array', 'min:1'],
             'guests.*.name' => ['required', 'string', 'max:255'],
+            'guests.*.gender' => ['required', Rule::in(['male', 'female'])],
             'guests.*.members' => ['array'],
             'guests.*.members.*' => ['string', 'max:255'],
         ]);
 
         $created = DB::transaction(fn () => collect($data['guests'])
-            ->map(fn ($guestData) => $this->createGuestGroup($guestData['name'], $data['side'], $guestData['members'] ?? []))
+            ->map(fn ($guestData) => $this->createGuestGroup($guestData['name'], $data['side'], $guestData['gender'], $guestData['members'] ?? []))
         );
 
         return response()->json(['guests' => $created->map($this->transform(...))], 201);
@@ -56,12 +58,13 @@ class GuestController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'side' => ['required', Rule::in(['groom', 'bride'])],
+            'gender' => ['required', Rule::in(['male', 'female'])],
             'members' => ['array'],
             'members.*.id' => ['nullable', 'integer'],
             'members.*.name' => ['required', 'string', 'max:255'],
         ]);
 
-        $guest->update(['name' => $data['name'], 'side' => $data['side']]);
+        $guest->update(['name' => $data['name'], 'side' => $data['side'], 'gender' => $data['gender']]);
 
         $keepIds = [];
 
@@ -119,12 +122,13 @@ class GuestController extends Controller
         ]);
     }
 
-    private function createGuestGroup(string $name, string $side, array $members): Guest
+    private function createGuestGroup(string $name, string $side, string $gender, array $members): Guest
     {
         $guest = Guest::create([
             'name' => $name,
             'slug' => $this->uniqueSlug($name),
             'side' => $side,
+            'gender' => $gender,
         ]);
 
         $guest->members()->create([
@@ -159,6 +163,7 @@ class GuestController extends Controller
             'name' => $guest->name,
             'slug' => $guest->slug,
             'side' => $guest->side,
+            'gender' => $guest->gender,
             'url' => $guest->url(),
             'members' => $guest->members->map(fn ($m) => [
                 'id' => $m->id,
