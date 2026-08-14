@@ -550,6 +550,11 @@ export default function AdminDashboard() {
     { total: 0, accepted: 0, declined: 0, pending: 0 },
   );
 
+  const sideTotals = guests.reduce(
+    (acc, g) => ({ ...acc, [g.side]: acc[g.side] + g.counts.total }),
+    { groom: 0, bride: 0 } as Record<Side, number>,
+  );
+
   const filteredGuests = sideFilter === 'total' ? guests : guests.filter((g) => g.side === sideFilter);
 
   const submitForm = async (name: string, side: Side, gender: Gender, members: { id?: number; name: string }[]) => {
@@ -638,6 +643,10 @@ export default function AdminDashboard() {
                 <StatTile label="Accepted" value={totals.accepted} color={STATUS_COLOR.yes.fg} />
                 <StatTile label="Declined" value={totals.declined} color={STATUS_COLOR.no.fg} />
                 <StatTile label="Pending" value={totals.pending} color={STATUS_COLOR.pending.fg} />
+              </div>
+              <div className="stat-grid" style={{ marginTop: 14 }}>
+                <StatTile label="Groom's guests" value={sideTotals.groom} color={SIDE_BADGE_COLOR.groom.fg} />
+                <StatTile label="Bride's guests" value={sideTotals.bride} color={SIDE_BADGE_COLOR.bride.fg} />
               </div>
               <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.45 0.03 h)', marginTop: 20 }}>
                 {guests.length} invitation{guests.length === 1 ? '' : 's'} sent so far.{' '}
