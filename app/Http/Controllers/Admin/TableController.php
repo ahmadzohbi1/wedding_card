@@ -31,7 +31,7 @@ class TableController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
-            'seats' => ['required', 'integer', 'min:1', 'max:50'],
+            'seats' => ['required', 'integer', 'min:1', 'max:24'],
         ]);
 
         $table = Table::create($data);
@@ -44,7 +44,7 @@ class TableController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
-            'seats' => ['required', 'integer', 'min:1', 'max:50'],
+            'seats' => ['required', 'integer', 'min:1', 'max:24'],
         ]);
 
         $seated = $table->members()->count();

@@ -450,35 +450,120 @@ function GuestViewModal({ guest, onClose }: { guest: GuestGroup; onClose: () => 
   );
 }
 
-const seatChipStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  fontFamily: "'Jost',sans-serif",
-  fontSize: 12,
-  color: 'oklch(from var(--brand) 0.35 0.03 h)',
-  background: 'oklch(from var(--brand) 0.97 0.008 h)',
-  border: '1px solid oklch(from var(--brand) 0.85 0.02 h)',
-  borderRadius: 20,
-  padding: '4px 6px 4px 12px',
-  whiteSpace: 'nowrap',
-};
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
-const seatChipRemoveStyle: React.CSSProperties = {
-  width: 18,
-  height: 18,
-  borderRadius: '50%',
-  border: 'none',
-  background: 'oklch(from var(--brand) 0.88 0.02 h)',
-  color: 'oklch(from var(--brand) 0.4 0.05 h)',
-  fontSize: 12,
-  lineHeight: 1,
-  cursor: 'pointer',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-};
+function RoundTable({ table, onAssignClick, onUnassign, busyMemberId }: {
+  table: SeatTable;
+  onAssignClick: () => void;
+  onUnassign: (memberId: number) => void;
+  busyMemberId: number | null;
+}) {
+  const seats = table.seats;
+  const diameter = Math.min(300, Math.max(170, 130 + seats * 7));
+  const seatSize = seats <= 6 ? 36 : seats <= 10 ? 32 : seats <= 16 ? 26 : 22;
+  const radius = diameter / 2 - seatSize / 2 - 2;
+  const center = diameter / 2;
+
+  const slots = Array.from({ length: seats }, (_, i) => {
+    const angle = (2 * Math.PI * i) / seats - Math.PI / 2;
+    return {
+      x: center + radius * Math.cos(angle),
+      y: center + radius * Math.sin(angle),
+      member: table.members[i] ?? null,
+    };
+  });
+
+  return (
+    <div style={{ position: 'relative', width: diameter, height: diameter }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: diameter * 0.24,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle at 34% 28%, oklch(from var(--brand) 0.99 0.008 h), oklch(from var(--brand) 0.92 0.02 h))',
+          border: '1px solid oklch(from var(--brand) 0.84 0.02 h)',
+          boxShadow: '0 6px 16px oklch(from var(--brand) 0.3 0.03 h / 0.18), inset 0 1px 3px oklch(1 0 0 / 0.7)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          padding: 6,
+        }}
+      >
+        <span style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: Math.max(13, diameter * 0.075), color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.15 }}>
+          {table.name}
+        </span>
+        <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', marginTop: 4 }}>
+          {table.members.length}/{seats}
+        </span>
+      </div>
+
+      {slots.map((slot, i) =>
+        slot.member ? (
+          <button
+            key={slot.member.id}
+            onClick={() => onUnassign(slot.member!.id)}
+            disabled={busyMemberId === slot.member.id}
+            title={`${slot.member.name} — click to remove`}
+            style={{
+              position: 'absolute',
+              left: slot.x - seatSize / 2,
+              top: slot.y - seatSize / 2,
+              width: seatSize,
+              height: seatSize,
+              borderRadius: '50%',
+              border: '2px solid oklch(var(--color-paper))',
+              background: STATUS_COLOR[slot.member.rsvp_status].bg,
+              color: STATUS_COLOR[slot.member.rsvp_status].fg,
+              fontFamily: "'Jost',sans-serif",
+              fontSize: seatSize > 28 ? 11 : 9,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: busyMemberId === slot.member.id ? 'default' : 'pointer',
+              boxShadow: '0 2px 6px oklch(from var(--brand) 0.3 0.03 h / 0.28)',
+              opacity: busyMemberId === slot.member.id ? 0.5 : 1,
+            }}
+          >
+            {initials(slot.member.name)}
+          </button>
+        ) : (
+          <button
+            key={`empty-${i}`}
+            onClick={onAssignClick}
+            aria-label={`Empty seat at ${table.name}`}
+            style={{
+              position: 'absolute',
+              left: slot.x - seatSize / 2,
+              top: slot.y - seatSize / 2,
+              width: seatSize,
+              height: seatSize,
+              borderRadius: '50%',
+              border: '1.5px dashed oklch(from var(--brand) 0.68 0.03 h)',
+              background: 'oklch(from var(--brand) 0.99 0.005 h)',
+              color: 'oklch(from var(--brand) 0.6 0.03 h)',
+              fontSize: seatSize > 28 ? 15 : 12,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            +
+          </button>
+        ),
+      )}
+    </div>
+  );
+}
 
 type TableFormState = { mode: 'create'; zone: Zone } | { mode: 'edit'; table: SeatTable };
 
@@ -502,9 +587,9 @@ function TableFormModal({ form, saving, error, onCancel, onSubmit }: {
       <input
         type="number"
         min={1}
-        max={50}
+        max={24}
         value={seats}
-        onChange={(e) => setSeats(Math.min(50, Math.max(1, Number(e.target.value) || 1)))}
+        onChange={(e) => setSeats(Math.min(24, Math.max(1, Number(e.target.value) || 1)))}
         style={{ ...inputStyle, marginBottom: 14 }}
       />
       {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
@@ -596,6 +681,57 @@ function AssignGuestModal({ table, unassigned, saving, error, onClose, onAssign 
   );
 }
 
+function PickTableModal({ member, tables, saving, error, onClose, onAssign }: {
+  member: SeatedMember;
+  tables: SeatTable[];
+  saving: boolean;
+  error: string | null;
+  onClose: () => void;
+  onAssign: (tableId: number) => void;
+}) {
+  const withRoom = tables.filter((t) => t.members.length < t.seats);
+
+  return (
+    <Modal title={`Seat ${member.name}`} onClose={onClose}>
+      {withRoom.length === 0 ? (
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)', marginBottom: 12 }}>
+          No tables with open seats yet. Add a table first.
+        </p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '50vh', overflowY: 'auto', marginBottom: 12 }}>
+          {withRoom.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => onAssign(t.id)}
+              disabled={saving}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 10,
+                background: 'oklch(from var(--brand) 0.97 0.008 h)',
+                border: '1px solid oklch(from var(--brand) 0.87 0.015 h)',
+                borderRadius: 8,
+                padding: '9px 12px',
+                cursor: saving ? 'default' : 'pointer',
+                textAlign: 'left',
+                opacity: saving ? 0.6 : 1,
+              }}
+            >
+              <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.3 0.03 h)' }}>{t.name}</span>
+              <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', whiteSpace: 'nowrap' }}>
+                {t.seats - t.members.length} seat{t.seats - t.members.length === 1 ? '' : 's'} left · {SIDE_LABEL[t.zone]}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
+      <button onClick={onClose} style={solidBtnStyle}>Close</button>
+    </Modal>
+  );
+}
+
 function TableCard({ table, onEdit, onDelete, onAssignClick, onUnassign, unassigning }: {
   table: SeatTable;
   onEdit: () => void;
@@ -604,50 +740,17 @@ function TableCard({ table, onEdit, onDelete, onAssignClick, onUnassign, unassig
   onUnassign: (memberId: number) => void;
   unassigning: number | null;
 }) {
-  const seated = table.members.length;
-  const full = seated >= table.seats;
+  const full = table.members.length >= table.seats;
 
   return (
-    <div style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 12, padding: '16px 18px', marginBottom: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <p style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 19, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>{table.name}</p>
-        <span
-          style={{
-            fontFamily: "'Jost',sans-serif",
-            fontSize: 12,
-            background: full ? STATUS_COLOR.no.bg : STATUS_COLOR.yes.bg,
-            color: full ? STATUS_COLOR.no.fg : STATUS_COLOR.yes.fg,
-            borderRadius: 20,
-            padding: '3px 10px',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {seated}/{table.seats} seated
-        </span>
-      </div>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12, minHeight: 26 }}>
-        {table.members.length === 0 && (
-          <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.55 0.03 h)', fontStyle: 'italic' }}>No guests seated yet</span>
-        )}
-        {table.members.map((m) => (
-          <span key={m.id} style={seatChipStyle}>
-            {m.name}
-            <button
-              onClick={() => onUnassign(m.id)}
-              disabled={unassigning === m.id}
-              aria-label={`Remove ${m.name} from ${table.name}`}
-              style={seatChipRemoveStyle}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 16, padding: '22px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <RoundTable table={table} onAssignClick={onAssignClick} onUnassign={onUnassign} busyMemberId={unassigning} />
+      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', textAlign: 'center', margin: 0, minHeight: 14, maxWidth: 220 }}>
+        {table.members.length > 0 ? table.members.map((m) => m.name).join(' · ') : 'No guests seated yet'}
+      </p>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
         <button onClick={onAssignClick} disabled={full} style={{ ...addBtnStyle, opacity: full ? 0.5 : 1, cursor: full ? 'not-allowed' : 'pointer' }}>
-          {full ? 'Table full' : '+ Assign guest'}
+          {full ? 'Full' : '+ Seat guest'}
         </button>
         <button onClick={onEdit} style={solidBtnStyle}>Edit</button>
         <button onClick={onDelete} style={{ ...solidBtnStyle, borderColor: 'oklch(var(--color-danger-border))', color: 'oklch(var(--color-danger))' }}>Delete</button>
@@ -656,46 +759,91 @@ function TableCard({ table, onEdit, onDelete, onAssignClick, onUnassign, unassig
   );
 }
 
-function ZonePanel({ zone, tables, onAddTable, onEditTable, onDeleteTable, onAssignClick, onUnassign, unassigning }: {
+function ZonePanel({ zone, tables, unseated, onAddTable, onEditTable, onDeleteTable, onAssignClick, onUnassign, onPickSeat, unassigning }: {
   zone: Zone;
   tables: SeatTable[];
+  unseated: SeatedMember[];
   onAddTable: (zone: Zone) => void;
   onEditTable: (table: SeatTable) => void;
   onDeleteTable: (table: SeatTable) => void;
   onAssignClick: (table: SeatTable) => void;
   onUnassign: (table: SeatTable, memberId: number) => void;
+  onPickSeat: (member: SeatedMember) => void;
   unassigning: number | null;
 }) {
   const seated = tables.reduce((sum, t) => sum + t.members.length, 0);
   const capacity = tables.reduce((sum, t) => sum + t.seats, 0);
+  const pct = capacity > 0 ? Math.round((seated / capacity) * 100) : 0;
+  const tint = zone === 'groom'
+    ? 'linear-gradient(160deg, oklch(from var(--brand) 0.97 0.02 h), oklch(from var(--brand) 0.99 0.008 h))'
+    : 'linear-gradient(160deg, oklch(0.97 0.025 20), oklch(0.99 0.01 20))';
 
   return (
-    <div style={{ flex: '1 1 380px', minWidth: 320 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-        <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 22, color: SIDE_BADGE_COLOR[zone].fg, margin: 0 }}>
-          {SIDE_LABEL[zone]} Zone
-        </h2>
-        <button onClick={() => onAddTable(zone)} style={addBtnStyle}>+ Add table</button>
+    <div style={{ flex: '1 1 420px', minWidth: 320 }}>
+      <div style={{ background: tint, border: '1px solid oklch(from var(--brand) 0.9 0.015 h)', borderRadius: 16, padding: '18px 20px', marginBottom: 18 }}>
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, letterSpacing: '0.25em', textTransform: 'uppercase', color: SIDE_BADGE_COLOR[zone].fg, margin: '0 0 4px' }}>
+          {SIDE_LABEL[zone]}
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontWeight: 500, fontSize: 26, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>
+            Zone
+          </h2>
+          <button onClick={() => onAddTable(zone)} style={addBtnStyle}>+ Add table</button>
+        </div>
+
+        <div style={{ height: 6, borderRadius: 3, background: 'oklch(from var(--brand) 0.88 0.02 h)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: SIDE_BADGE_COLOR[zone].fg, transition: 'width 400ms ease' }} />
+        </div>
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: '6px 0 0' }}>
+          {seated}/{capacity} seated · {tables.length} table{tables.length === 1 ? '' : 's'}
+        </p>
+
+        {unseated.length > 0 && (
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid oklch(from var(--brand) 0.88 0.015 h)' }}>
+            <p style={{ ...labelStyle, marginBottom: 8 }}>Waiting to be seated ({unseated.length})</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {unseated.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => onPickSeat(m)}
+                  style={{
+                    fontFamily: "'Jost',sans-serif",
+                    fontSize: 12,
+                    background: 'oklch(from var(--brand) 0.99 0.005 h)',
+                    border: '1px dashed oklch(from var(--brand) 0.65 0.04 h)',
+                    borderRadius: 20,
+                    padding: '4px 12px',
+                    color: 'oklch(from var(--brand) 0.4 0.06 h)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: '0 0 14px' }}>
-        {tables.length} table{tables.length === 1 ? '' : 's'} · {seated}/{capacity} seated
-      </p>
-      {tables.length === 0 && (
+
+      {tables.length === 0 ? (
         <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
           No tables yet. Click "+ Add table" to set one up.
         </p>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
+          {tables.map((table) => (
+            <TableCard
+              key={table.id}
+              table={table}
+              onEdit={() => onEditTable(table)}
+              onDelete={() => onDeleteTable(table)}
+              onAssignClick={() => onAssignClick(table)}
+              onUnassign={(memberId) => onUnassign(table, memberId)}
+              unassigning={unassigning}
+            />
+          ))}
+        </div>
       )}
-      {tables.map((table) => (
-        <TableCard
-          key={table.id}
-          table={table}
-          onEdit={() => onEditTable(table)}
-          onDelete={() => onDeleteTable(table)}
-          onAssignClick={() => onAssignClick(table)}
-          onUnassign={(memberId) => onUnassign(table, memberId)}
-          unassigning={unassigning}
-        />
-      ))}
     </div>
   );
 }
@@ -794,6 +942,7 @@ export default function AdminDashboard() {
   const [tableFormError, setTableFormError] = useState<string | null>(null);
 
   const [assigningTable, setAssigningTable] = useState<SeatTable | null>(null);
+  const [pickingMember, setPickingMember] = useState<SeatedMember | null>(null);
   const [seatBusyId, setSeatBusyId] = useState<number | null>(null);
   const [seatError, setSeatError] = useState<string | null>(null);
 
@@ -961,7 +1110,7 @@ export default function AdminDashboard() {
     setUnassignedMembers((u) => [...u, ...table.members].sort((a, b) => a.name.localeCompare(b.name)));
   };
 
-  const assignMemberToTable = async (member: SeatedMember, tableId: number) => {
+  const assignMemberToTable = async (member: SeatedMember, tableId: number): Promise<boolean> => {
     setSeatBusyId(member.id);
     setSeatError(null);
     try {
@@ -972,8 +1121,10 @@ export default function AdminDashboard() {
       setUnassignedMembers((u) => u.filter((m) => m.id !== member.id));
       setTables((t) => t.map((table) => (table.id === tableId ? { ...table, members: [...table.members, member] } : table)));
       setAssigningTable((current) => (current && current.id === tableId ? { ...current, members: [...current.members, member] } : current));
+      return true;
     } catch (err) {
       setSeatError(err instanceof Error ? err.message : 'Could not seat this guest.');
+      return false;
     } finally {
       setSeatBusyId(null);
     }
@@ -993,8 +1144,6 @@ export default function AdminDashboard() {
       setSeatBusyId(null);
     }
   };
-
-  const seatedTotal = tables.reduce((sum, t) => sum + t.members.length, 0);
 
   return (
     <div className="admin-shell">
@@ -1119,10 +1268,14 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.45 0.03 h)', margin: '2px 0 20px' }}>
-                {seatedTotal} of {totals.total} guests seated across {tables.length} table{tables.length === 1 ? '' : 's'}.
-                {unassignedMembers.length > 0 && ` ${unassignedMembers.length} still need a seat.`}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', margin: '2px 0 22px' }}>
+                {(['yes', 'pending', 'no'] as RsvpStatus[]).map((status) => (
+                  <span key={status} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: STATUS_COLOR[status].bg, border: `1px solid ${STATUS_COLOR[status].fg}` }} />
+                    {status === 'yes' ? 'Confirmed' : status === 'no' ? 'Declined' : 'Pending'}
+                  </span>
+                ))}
+              </div>
 
               {tablesLoading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>Loading…</p>}
               {tablesError && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(var(--color-danger))' }}>{tablesError}</p>}
@@ -1134,11 +1287,13 @@ export default function AdminDashboard() {
                       key={zone}
                       zone={zone}
                       tables={tables.filter((t) => t.zone === zone)}
+                      unseated={unassignedMembers.filter((m) => m.side === zone)}
                       onAddTable={(z) => setTableFormState({ mode: 'create', zone: z })}
                       onEditTable={(table) => setTableFormState({ mode: 'edit', table })}
                       onDeleteTable={deleteTable}
                       onAssignClick={(table) => { setAssigningTable(table); setSeatError(null); }}
                       onUnassign={unassignMember}
+                      onPickSeat={(member) => { setPickingMember(member); setSeatError(null); }}
                       unassigning={seatBusyId}
                     />
                   ))}
@@ -1204,6 +1359,20 @@ export default function AdminDashboard() {
           error={seatError}
           onClose={() => { setAssigningTable(null); setSeatError(null); }}
           onAssign={(member) => assignMemberToTable(member, assigningTable.id)}
+        />
+      )}
+
+      {pickingMember && (
+        <PickTableModal
+          member={pickingMember}
+          tables={tables}
+          saving={seatBusyId === pickingMember.id}
+          error={seatError}
+          onClose={() => { setPickingMember(null); setSeatError(null); }}
+          onAssign={async (tableId) => {
+            const ok = await assignMemberToTable(pickingMember, tableId);
+            if (ok) setPickingMember(null);
+          }}
         />
       )}
     </div>
