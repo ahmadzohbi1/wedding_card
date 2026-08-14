@@ -28,6 +28,25 @@ type GuestGroup = {
 
 type SideFilter = Side | 'total';
 
+type Zone = Side;
+
+type SeatedMember = {
+  id: number;
+  name: string;
+  rsvp_status: RsvpStatus;
+  guest_id: number;
+  guest_name: string;
+  side: Side | null;
+};
+
+type SeatTable = {
+  id: number;
+  name: string;
+  zone: Zone;
+  seats: number;
+  members: SeatedMember[];
+};
+
 const SIDE_LABEL: Record<Side, string> = { groom: 'Groom', bride: 'Bride' };
 
 const SIDE_BADGE_COLOR: Record<Side, { bg: string; fg: string }> = {
@@ -37,11 +56,12 @@ const SIDE_BADGE_COLOR: Record<Side, { bg: string; fg: string }> = {
 
 const GENDER_LABEL: Record<Gender, string> = { male: 'Male', female: 'Female' };
 
-type NavKey = 'overview' | 'invitations' | 'settings';
+type NavKey = 'overview' | 'invitations' | 'tables' | 'settings';
 
 const NAV_ITEMS: { key: NavKey; label: string }[] = [
   { key: 'overview', label: 'Overview' },
   { key: 'invitations', label: 'Invitations' },
+  { key: 'tables', label: 'Tables' },
   { key: 'settings', label: 'Settings' },
 ];
 
@@ -63,7 +83,9 @@ async function api(url: string, options: RequestInit = {}) {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new Error(body?.message ?? 'Request failed');
+    const firstFieldError = body?.errors && Object.values(body.errors)[0];
+    const message = Array.isArray(firstFieldError) ? firstFieldError[0] : body?.message;
+    throw new Error(message ?? 'Request failed');
   }
   return res.status === 204 ? null : res.json();
 }
@@ -249,10 +271,10 @@ function ToggleSwitch({ checked, onChange, disabled }: { checked: boolean; onCha
 
 type FormState = { mode: 'create' } | { mode: 'edit'; guest: GuestGroup };
 
-function SideSelector({ value, onChange }: { value: Side; onChange: (side: Side) => void }) {
+function SideSelector({ value, onChange, label = 'Side' }: { value: Side; onChange: (side: Side) => void; label?: string }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={labelStyle}>Side</label>
+      <label style={labelStyle}>{label}</label>
       <div style={{ display: 'flex', gap: 8 }}>
         {(['groom', 'bride'] as Side[]).map((s) => (
           <button key={s} type="button" onClick={() => onChange(s)} style={sideSelectorBtnStyle(value === s)}>
@@ -428,6 +450,256 @@ function GuestViewModal({ guest, onClose }: { guest: GuestGroup; onClose: () => 
   );
 }
 
+const seatChipStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  fontFamily: "'Jost',sans-serif",
+  fontSize: 12,
+  color: 'oklch(from var(--brand) 0.35 0.03 h)',
+  background: 'oklch(from var(--brand) 0.97 0.008 h)',
+  border: '1px solid oklch(from var(--brand) 0.85 0.02 h)',
+  borderRadius: 20,
+  padding: '4px 6px 4px 12px',
+  whiteSpace: 'nowrap',
+};
+
+const seatChipRemoveStyle: React.CSSProperties = {
+  width: 18,
+  height: 18,
+  borderRadius: '50%',
+  border: 'none',
+  background: 'oklch(from var(--brand) 0.88 0.02 h)',
+  color: 'oklch(from var(--brand) 0.4 0.05 h)',
+  fontSize: 12,
+  lineHeight: 1,
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+};
+
+type TableFormState = { mode: 'create'; zone: Zone } | { mode: 'edit'; table: SeatTable };
+
+function TableFormModal({ form, saving, error, onCancel, onSubmit }: {
+  form: TableFormState;
+  saving: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onSubmit: (name: string, zone: Zone, seats: number) => void;
+}) {
+  const [name, setName] = useState(form.mode === 'edit' ? form.table.name : '');
+  const [zone, setZone] = useState<Zone>(form.mode === 'edit' ? form.table.zone : form.zone);
+  const [seats, setSeats] = useState(form.mode === 'edit' ? form.table.seats : 8);
+
+  return (
+    <Modal title={form.mode === 'create' ? 'Add a table' : 'Edit table'} onClose={onCancel}>
+      <label style={labelStyle}>Table name</label>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Table 1" style={{ ...inputStyle, marginBottom: 14 }} />
+      <SideSelector value={zone} onChange={setZone} label="Zone" />
+      <label style={labelStyle}>Seats</label>
+      <input
+        type="number"
+        min={1}
+        max={50}
+        value={seats}
+        onChange={(e) => setSeats(Math.min(50, Math.max(1, Number(e.target.value) || 1)))}
+        style={{ ...inputStyle, marginBottom: 14 }}
+      />
+      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
+      <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+        <button onClick={() => onSubmit(name, zone, seats)} disabled={saving || !name.trim() || seats < 1} style={primaryBtnStyle}>
+          {saving ? 'Saving…' : form.mode === 'create' ? 'Create table' : 'Save changes'}
+        </button>
+        <button onClick={onCancel} style={solidBtnStyle}>Cancel</button>
+      </div>
+    </Modal>
+  );
+}
+
+function AssignGuestModal({ table, unassigned, saving, error, onClose, onAssign }: {
+  table: SeatTable;
+  unassigned: SeatedMember[];
+  saving: number | null;
+  error: string | null;
+  onClose: () => void;
+  onAssign: (member: SeatedMember) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [showAllSides, setShowAllSides] = useState(false);
+
+  const remaining = table.seats - table.members.length;
+  const pool = showAllSides ? unassigned : unassigned.filter((m) => m.side === table.zone);
+  const q = query.trim().toLowerCase();
+  const filtered = q ? pool.filter((m) => m.name.toLowerCase().includes(q) || m.guest_name.toLowerCase().includes(q)) : pool;
+
+  return (
+    <Modal title={`Assign a guest — ${table.name}`} onClose={onClose}>
+      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: '0 0 14px' }}>
+        {remaining > 0 ? `${remaining} seat${remaining === 1 ? '' : 's'} left at this table.` : 'This table is full.'}
+      </p>
+      {remaining > 0 ? (
+        <>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search guest name…"
+            style={{ ...inputStyle, marginBottom: 10 }}
+          />
+          {!showAllSides && (
+            <button type="button" onClick={() => setShowAllSides(true)} style={{ ...addBtnStyle, marginBottom: 12 }}>
+              Show guests from both sides
+            </button>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '42vh', overflowY: 'auto', marginBottom: 12 }}>
+            {filtered.length === 0 && (
+              <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+                No unassigned guests match.
+              </p>
+            )}
+            {filtered.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => onAssign(m)}
+                disabled={saving === m.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 10,
+                  background: 'oklch(from var(--brand) 0.97 0.008 h)',
+                  border: '1px solid oklch(from var(--brand) 0.87 0.015 h)',
+                  borderRadius: 8,
+                  padding: '9px 12px',
+                  cursor: saving === m.id ? 'default' : 'pointer',
+                  textAlign: 'left',
+                  opacity: saving === m.id ? 0.6 : 1,
+                }}
+              >
+                <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.3 0.03 h)' }}>{m.name}</span>
+                <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', whiteSpace: 'nowrap' }}>
+                  {m.guest_name}{m.side ? ` · ${SIDE_LABEL[m.side]}` : ''}
+                </span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)', marginBottom: 12 }}>
+          Remove a guest or increase this table's seats to add more.
+        </p>
+      )}
+      {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
+      <button onClick={onClose} style={solidBtnStyle}>Close</button>
+    </Modal>
+  );
+}
+
+function TableCard({ table, onEdit, onDelete, onAssignClick, onUnassign, unassigning }: {
+  table: SeatTable;
+  onEdit: () => void;
+  onDelete: () => void;
+  onAssignClick: () => void;
+  onUnassign: (memberId: number) => void;
+  unassigning: number | null;
+}) {
+  const seated = table.members.length;
+  const full = seated >= table.seats;
+
+  return (
+    <div style={{ background: 'oklch(from var(--brand) 0.99 0.005 h)', border: '1px solid oklch(from var(--brand) 0.87 0.015 h)', borderRadius: 12, padding: '16px 18px', marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <p style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 19, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>{table.name}</p>
+        <span
+          style={{
+            fontFamily: "'Jost',sans-serif",
+            fontSize: 12,
+            background: full ? STATUS_COLOR.no.bg : STATUS_COLOR.yes.bg,
+            color: full ? STATUS_COLOR.no.fg : STATUS_COLOR.yes.fg,
+            borderRadius: 20,
+            padding: '3px 10px',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {seated}/{table.seats} seated
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12, minHeight: 26 }}>
+        {table.members.length === 0 && (
+          <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.55 0.03 h)', fontStyle: 'italic' }}>No guests seated yet</span>
+        )}
+        {table.members.map((m) => (
+          <span key={m.id} style={seatChipStyle}>
+            {m.name}
+            <button
+              onClick={() => onUnassign(m.id)}
+              disabled={unassigning === m.id}
+              aria-label={`Remove ${m.name} from ${table.name}`}
+              style={seatChipRemoveStyle}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button onClick={onAssignClick} disabled={full} style={{ ...addBtnStyle, opacity: full ? 0.5 : 1, cursor: full ? 'not-allowed' : 'pointer' }}>
+          {full ? 'Table full' : '+ Assign guest'}
+        </button>
+        <button onClick={onEdit} style={solidBtnStyle}>Edit</button>
+        <button onClick={onDelete} style={{ ...solidBtnStyle, borderColor: 'oklch(var(--color-danger-border))', color: 'oklch(var(--color-danger))' }}>Delete</button>
+      </div>
+    </div>
+  );
+}
+
+function ZonePanel({ zone, tables, onAddTable, onEditTable, onDeleteTable, onAssignClick, onUnassign, unassigning }: {
+  zone: Zone;
+  tables: SeatTable[];
+  onAddTable: (zone: Zone) => void;
+  onEditTable: (table: SeatTable) => void;
+  onDeleteTable: (table: SeatTable) => void;
+  onAssignClick: (table: SeatTable) => void;
+  onUnassign: (table: SeatTable, memberId: number) => void;
+  unassigning: number | null;
+}) {
+  const seated = tables.reduce((sum, t) => sum + t.members.length, 0);
+  const capacity = tables.reduce((sum, t) => sum + t.seats, 0);
+
+  return (
+    <div style={{ flex: '1 1 380px', minWidth: 320 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 22, color: SIDE_BADGE_COLOR[zone].fg, margin: 0 }}>
+          {SIDE_LABEL[zone]} Zone
+        </h2>
+        <button onClick={() => onAddTable(zone)} style={addBtnStyle}>+ Add table</button>
+      </div>
+      <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(from var(--brand) 0.5 0.03 h)', margin: '0 0 14px' }}>
+        {tables.length} table{tables.length === 1 ? '' : 's'} · {seated}/{capacity} seated
+      </p>
+      {tables.length === 0 && (
+        <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+          No tables yet. Click "+ Add table" to set one up.
+        </p>
+      )}
+      {tables.map((table) => (
+        <TableCard
+          key={table.id}
+          table={table}
+          onEdit={() => onEditTable(table)}
+          onDelete={() => onDeleteTable(table)}
+          onAssignClick={() => onAssignClick(table)}
+          onUnassign={(memberId) => onUnassign(table, memberId)}
+          unassigning={unassigning}
+        />
+      ))}
+    </div>
+  );
+}
+
 function Sidebar({ active, onSelect }: { active: NavKey; onSelect: (key: NavKey) => void }) {
   return (
     <nav className="admin-sidebar">
@@ -467,7 +739,7 @@ function Sidebar({ active, onSelect }: { active: NavKey; onSelect: (key: NavKey)
   );
 }
 
-const VALID_VIEWS: NavKey[] = ['overview', 'invitations', 'settings'];
+const VALID_VIEWS: NavKey[] = ['overview', 'invitations', 'tables', 'settings'];
 
 function getInitialView(): NavKey {
   const requested = new URLSearchParams(window.location.search).get('view');
@@ -512,6 +784,19 @@ export default function AdminDashboard() {
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsSaving, setSettingsSaving] = useState(false);
 
+  const [tables, setTables] = useState<SeatTable[]>([]);
+  const [unassignedMembers, setUnassignedMembers] = useState<SeatedMember[]>([]);
+  const [tablesLoading, setTablesLoading] = useState(true);
+  const [tablesError, setTablesError] = useState<string | null>(null);
+
+  const [tableFormState, setTableFormState] = useState<TableFormState | null>(null);
+  const [tableFormSaving, setTableFormSaving] = useState(false);
+  const [tableFormError, setTableFormError] = useState<string | null>(null);
+
+  const [assigningTable, setAssigningTable] = useState<SeatTable | null>(null);
+  const [seatBusyId, setSeatBusyId] = useState<number | null>(null);
+  const [seatError, setSeatError] = useState<string | null>(null);
+
   const loadGuests = async () => {
     setLoading(true);
     setLoadError(null);
@@ -535,9 +820,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadTables = async () => {
+    setTablesLoading(true);
+    setTablesError(null);
+    try {
+      const data = await api('/admin/api/tables');
+      setTables(data.tables);
+      setUnassignedMembers(data.unassigned);
+    } catch {
+      setTablesError('Could not load tables.');
+    } finally {
+      setTablesLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadGuests();
     loadSettings();
+    loadTables();
   }, []);
 
   const totals = guests.reduce(
@@ -627,6 +927,74 @@ export default function AdminDashboard() {
       setSettingsSaving(false);
     }
   };
+
+  const submitTableForm = async (name: string, zone: Zone, seats: number) => {
+    if (!tableFormState) return;
+    setTableFormSaving(true);
+    setTableFormError(null);
+    try {
+      if (tableFormState.mode === 'create') {
+        const data = await api('/admin/api/tables', {
+          method: 'POST',
+          body: JSON.stringify({ name, zone, seats }),
+        });
+        setTables((t) => [...t, data.table]);
+      } else {
+        const data = await api(`/admin/api/tables/${tableFormState.table.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ name, zone, seats }),
+        });
+        setTables((t) => t.map((item) => (item.id === tableFormState.table.id ? data.table : item)));
+      }
+      setTableFormState(null);
+    } catch (err) {
+      setTableFormError(err instanceof Error ? err.message : 'Could not save this table.');
+    } finally {
+      setTableFormSaving(false);
+    }
+  };
+
+  const deleteTable = async (table: SeatTable) => {
+    if (!confirm(`Delete ${table.name}? Its seated guests will become unassigned.`)) return;
+    await api(`/admin/api/tables/${table.id}`, { method: 'DELETE' });
+    setTables((t) => t.filter((item) => item.id !== table.id));
+    setUnassignedMembers((u) => [...u, ...table.members].sort((a, b) => a.name.localeCompare(b.name)));
+  };
+
+  const assignMemberToTable = async (member: SeatedMember, tableId: number) => {
+    setSeatBusyId(member.id);
+    setSeatError(null);
+    try {
+      await api('/admin/api/tables/seating', {
+        method: 'PATCH',
+        body: JSON.stringify({ member_id: member.id, table_id: tableId }),
+      });
+      setUnassignedMembers((u) => u.filter((m) => m.id !== member.id));
+      setTables((t) => t.map((table) => (table.id === tableId ? { ...table, members: [...table.members, member] } : table)));
+      setAssigningTable((current) => (current && current.id === tableId ? { ...current, members: [...current.members, member] } : current));
+    } catch (err) {
+      setSeatError(err instanceof Error ? err.message : 'Could not seat this guest.');
+    } finally {
+      setSeatBusyId(null);
+    }
+  };
+
+  const unassignMember = async (table: SeatTable, memberId: number) => {
+    setSeatBusyId(memberId);
+    try {
+      await api('/admin/api/tables/seating', {
+        method: 'PATCH',
+        body: JSON.stringify({ member_id: memberId, table_id: null }),
+      });
+      const removed = table.members.find((m) => m.id === memberId);
+      setTables((t) => t.map((item) => (item.id === table.id ? { ...item, members: item.members.filter((m) => m.id !== memberId) } : item)));
+      if (removed) setUnassignedMembers((u) => [...u, removed].sort((a, b) => a.name.localeCompare(b.name)));
+    } finally {
+      setSeatBusyId(null);
+    }
+  };
+
+  const seatedTotal = tables.reduce((sum, t) => sum + t.members.length, 0);
 
   return (
     <div className="admin-shell">
@@ -742,6 +1110,43 @@ export default function AdminDashboard() {
             </>
           )}
 
+          {view === 'tables' && (
+            <>
+              <div className="admin-panel-header">
+                <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>Tables ({tables.length})</h1>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <a href="/admin/api/tables-export" style={solidBtnStyle}>Export seating (Excel)</a>
+                </div>
+              </div>
+
+              <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 14, color: 'oklch(from var(--brand) 0.45 0.03 h)', margin: '2px 0 20px' }}>
+                {seatedTotal} of {totals.total} guests seated across {tables.length} table{tables.length === 1 ? '' : 's'}.
+                {unassignedMembers.length > 0 && ` ${unassignedMembers.length} still need a seat.`}
+              </p>
+
+              {tablesLoading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>Loading…</p>}
+              {tablesError && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(var(--color-danger))' }}>{tablesError}</p>}
+
+              {!tablesLoading && !tablesError && (
+                <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+                  {(['groom', 'bride'] as Zone[]).map((zone) => (
+                    <ZonePanel
+                      key={zone}
+                      zone={zone}
+                      tables={tables.filter((t) => t.zone === zone)}
+                      onAddTable={(z) => setTableFormState({ mode: 'create', zone: z })}
+                      onEditTable={(table) => setTableFormState({ mode: 'edit', table })}
+                      onDeleteTable={deleteTable}
+                      onAssignClick={(table) => { setAssigningTable(table); setSeatError(null); }}
+                      onUnassign={unassignMember}
+                      unassigning={seatBusyId}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           {view === 'settings' && (
             <>
               <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: 28, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: '0 0 20px' }}>Settings</h1>
@@ -780,6 +1185,27 @@ export default function AdminDashboard() {
       )}
 
       {viewingGuest && <GuestViewModal guest={viewingGuest} onClose={() => setViewingGuest(null)} />}
+
+      {tableFormState && (
+        <TableFormModal
+          form={tableFormState}
+          saving={tableFormSaving}
+          error={tableFormError}
+          onCancel={() => { setTableFormState(null); setTableFormError(null); }}
+          onSubmit={submitTableForm}
+        />
+      )}
+
+      {assigningTable && (
+        <AssignGuestModal
+          table={assigningTable}
+          unassigned={unassignedMembers}
+          saving={seatBusyId}
+          error={seatError}
+          onClose={() => { setAssigningTable(null); setSeatError(null); }}
+          onAssign={(member) => assignMemberToTable(member, assigningTable.id)}
+        />
+      )}
     </div>
   );
 }
