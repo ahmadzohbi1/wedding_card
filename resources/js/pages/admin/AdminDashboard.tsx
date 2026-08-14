@@ -778,6 +778,12 @@ function ZonePanel({ zone, tables, unseated, onAddTable, onEditTable, onDeleteTa
     ? 'linear-gradient(160deg, oklch(from var(--brand) 0.97 0.02 h), oklch(from var(--brand) 0.99 0.008 h))'
     : 'linear-gradient(160deg, oklch(0.97 0.025 20), oklch(0.99 0.01 20))';
 
+  const perPage = 8;
+  const [unseatedPage, setUnseatedPage] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(unseated.length / perPage));
+  const page = Math.min(unseatedPage, totalPages - 1);
+  const pageItems = unseated.slice(page * perPage, page * perPage + perPage);
+
   return (
     <div style={{ flex: '1 1 420px', minWidth: 320 }}>
       <div style={{ background: tint, border: '1px solid oklch(from var(--brand) 0.9 0.015 h)', borderRadius: 16, padding: '18px 20px', marginBottom: 18 }}>
@@ -802,7 +808,7 @@ function ZonePanel({ zone, tables, unseated, onAddTable, onEditTable, onDeleteTa
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid oklch(from var(--brand) 0.88 0.015 h)' }}>
             <p style={{ ...labelStyle, marginBottom: 8 }}>Waiting to be seated ({unseated.length})</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {unseated.map((m) => (
+              {pageItems.map((m) => (
                 <button
                   key={m.id}
                   onClick={() => onPickSeat(m)}
@@ -821,6 +827,47 @@ function ZonePanel({ zone, tables, unseated, onAddTable, onEditTable, onDeleteTa
                 </button>
               ))}
             </div>
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+                <button
+                  onClick={() => setUnseatedPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  style={{
+                    fontFamily: "'Jost',sans-serif",
+                    fontSize: 11,
+                    border: '1px solid oklch(from var(--brand) 0.75 0.02 h)',
+                    borderRadius: 20,
+                    padding: '4px 12px',
+                    background: 'none',
+                    color: 'oklch(from var(--brand) 0.45 0.05 h)',
+                    cursor: page === 0 ? 'default' : 'pointer',
+                    opacity: page === 0 ? 0.4 : 1,
+                  }}
+                >
+                  ‹ Prev
+                </button>
+                <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+                  Page {page + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setUnseatedPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  style={{
+                    fontFamily: "'Jost',sans-serif",
+                    fontSize: 11,
+                    border: '1px solid oklch(from var(--brand) 0.75 0.02 h)',
+                    borderRadius: 20,
+                    padding: '4px 12px',
+                    background: 'none',
+                    color: 'oklch(from var(--brand) 0.45 0.05 h)',
+                    cursor: page >= totalPages - 1 ? 'default' : 'pointer',
+                    opacity: page >= totalPages - 1 ? 0.4 : 1,
+                  }}
+                >
+                  Next ›
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
