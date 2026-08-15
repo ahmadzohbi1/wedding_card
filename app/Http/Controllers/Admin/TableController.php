@@ -32,7 +32,6 @@ class TableController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
             'seats' => ['required', 'integer', 'min:1', 'max:24'],
-            'shape' => ['required', Rule::in(['round', 'oval', 'donut', 'l', 's'])],
             'is_main' => ['sometimes', 'boolean'],
         ]);
 
@@ -51,7 +50,6 @@ class TableController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
             'seats' => ['required', 'integer', 'min:1', 'max:24'],
-            'shape' => ['required', Rule::in(['round', 'oval', 'donut', 'l', 's'])],
             'is_main' => ['sometimes', 'boolean'],
         ]);
 
@@ -218,7 +216,6 @@ class TableController extends Controller
             'name' => $table->name,
             'zone' => $table->zone,
             'seats' => $table->seats,
-            'shape' => $table->shape,
             'is_main' => $table->is_main,
             'members' => $table->members->map($this->transformMember(...))->values(),
         ];

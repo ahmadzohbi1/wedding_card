@@ -39,22 +39,11 @@ type SeatedMember = {
   side: Side | null;
 };
 
-type TableShape = 'round' | 'oval' | 'donut' | 'l' | 's';
-
-const SHAPE_LABEL: Record<TableShape, string> = {
-  round: 'Circle',
-  oval: 'Egg / Oval',
-  donut: 'Donut',
-  l: 'L-Shape',
-  s: 'S-Shape',
-};
-
 type SeatTable = {
   id: number;
   name: string;
   zone: Zone;
   seats: number;
-  shape: TableShape;
   is_main: boolean;
   members: SeatedMember[];
 };
@@ -469,213 +458,46 @@ function initials(name: string): string {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-function polygonPerimeterPoints(points: { x: number; y: number }[], count: number) {
-  const n = points.length;
-  const edgeLen = points.map((p, i) => {
-    const q = points[(i + 1) % n];
-    return Math.hypot(q.x - p.x, q.y - p.y);
-  });
-  const perimeter = edgeLen.reduce((a, b) => a + b, 0);
-  return Array.from({ length: count }, (_, i) => {
-    let dist = (perimeter * i) / count;
-    let idx = 0;
-    while (dist > edgeLen[idx] && idx < n - 1) {
-      dist -= edgeLen[idx];
-      idx++;
-    }
-    const p0 = points[idx];
-    const p1 = points[(idx + 1) % n];
-    const t = edgeLen[idx] === 0 ? 0 : dist / edgeLen[idx];
-    return { x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t };
-  });
-}
-
-function polygonCentroid(points: { x: number; y: number }[]) {
-  const x = points.reduce((sum, p) => sum + p.x, 0) / points.length;
-  const y = points.reduce((sum, p) => sum + p.y, 0) / points.length;
-  return { x, y };
-}
-
-function openPathPoints(points: { x: number; y: number }[], count: number) {
-  const segLen = points.slice(0, -1).map((p, i) => Math.hypot(points[i + 1].x - p.x, points[i + 1].y - p.y));
-  const total = segLen.reduce((a, b) => a + b, 0);
-  return Array.from({ length: count }, (_, i) => {
-    const target = count === 1 ? total / 2 : (total * i) / (count - 1);
-    let dist = target;
-    let idx = 0;
-    while (idx < segLen.length - 1 && dist > segLen[idx]) {
-      dist -= segLen[idx];
-      idx++;
-    }
-    const p0 = points[idx];
-    const p1 = points[idx + 1] ?? points[idx];
-    const t = segLen[idx] ? dist / segLen[idx] : 0;
-    return { x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t };
-  });
-}
-
-// Places points beside an open path (like chairs along a serpentine table), offset
-// perpendicular to the local direction of travel rather than sitting on the path itself.
-function offsetPathPoints(points: { x: number; y: number }[], count: number, offset: number) {
-  return openPathPoints(points, count === 1 ? 2 : count).slice(0, count).map((p, i, arr) => {
-    const prev = arr[i - 1] ?? p;
-    const next = arr[i + 1] ?? p;
-    const dx = next.x - prev.x;
-    const dy = next.y - prev.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len;
-    const ny = dx / len;
-    return { x: p.x + nx * offset, y: p.y + ny * offset };
-  });
-}
-
-function cubicPoint(p0: { x: number; y: number }, p1: { x: number; y: number }, p2: { x: number; y: number }, p3: { x: number; y: number }, t: number) {
-  const mt = 1 - t;
-  return {
-    x: mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x,
-    y: mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y,
-  };
-}
-
-// Two mirrored cubic-bezier arcs (like the letter "S" / a serpentine table) in a 0..1 normalized box.
-function sCurveControlPoints(size: number, pad: number) {
-  const box = size - pad * 2;
-  const s = (x: number, y: number) => ({ x: pad + x * box, y: pad + y * box });
-  return {
-    seg1: [s(0.78, 0.06), s(0.12, 0.06), s(0.12, 0.46), s(0.5, 0.5)],
-    seg2: [s(0.5, 0.5), s(0.88, 0.54), s(0.88, 0.94), s(0.22, 0.94)],
-  };
-}
-
-function sCurvePathD(size: number, pad: number) {
-  const { seg1, seg2 } = sCurveControlPoints(size, pad);
-  return `M ${seg1[0].x} ${seg1[0].y} C ${seg1[1].x} ${seg1[1].y} ${seg1[2].x} ${seg1[2].y} ${seg1[3].x} ${seg1[3].y} C ${seg2[1].x} ${seg2[1].y} ${seg2[2].x} ${seg2[2].y} ${seg2[3].x} ${seg2[3].y}`;
-}
-
-function sCurvePolyline(size: number, pad: number) {
-  const { seg1, seg2 } = sCurveControlPoints(size, pad);
-  const steps = 28;
-  const a = Array.from({ length: steps + 1 }, (_, i) => cubicPoint(seg1[0], seg1[1], seg1[2], seg1[3], i / steps));
-  const b = Array.from({ length: steps }, (_, i) => cubicPoint(seg2[0], seg2[1], seg2[2], seg2[3], (i + 1) / steps));
-  return [...a, ...b];
-}
-
-const SHAPE_POLYGONS: Record<'l', { x: number; y: number }[]> = {
-  l: [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: 0.42 },
-    { x: 0.42, y: 0.42 },
-    { x: 0.42, y: 1 },
-    { x: 0, y: 1 },
-  ],
-};
-
-function TableDiagram({ table, onAssignClick, onUnassign, busyMemberId }: {
+function RoundTable({ table, onAssignClick, onUnassign, busyMemberId }: {
   table: SeatTable;
   onAssignClick: () => void;
   onUnassign: (memberId: number) => void;
   busyMemberId: number | null;
 }) {
   const seats = table.seats;
-  const shape = table.shape ?? 'round';
-  const size = Math.min(300, Math.max(170, 130 + seats * 7));
+  const diameter = Math.min(300, Math.max(170, 130 + seats * 7));
   const seatSize = seats <= 6 ? 36 : seats <= 10 ? 32 : seats <= 16 ? 26 : 22;
-  const center = size / 2;
+  const radius = diameter / 2 - seatSize / 2 - 2;
+  const center = diameter / 2;
 
-  let points: { x: number; y: number }[];
-  let labelPos = { x: center, y: center };
-  let body: React.ReactNode;
+  const slots = Array.from({ length: seats }, (_, i) => {
+    const angle = (2 * Math.PI * i) / seats - Math.PI / 2;
+    return {
+      x: center + radius * Math.cos(angle),
+      y: center + radius * Math.sin(angle),
+      member: table.members[i] ?? null,
+    };
+  });
 
-  if (shape === 'l') {
-    const pad = seatSize / 2 + 6;
-    const poly = SHAPE_POLYGONS.l.map((p) => ({ x: pad + p.x * (size - pad * 2), y: pad + p.y * (size - pad * 2) }));
-    points = polygonPerimeterPoints(poly, seats);
-    labelPos = polygonCentroid(poly);
-    body = (
-      <svg width={size} height={size} style={{ position: 'absolute', inset: 0 }}>
-        <polygon
-          points={poly.map((p) => `${p.x},${p.y}`).join(' ')}
-          fill="oklch(from var(--brand) 0.95 0.015 h)"
-          stroke="oklch(from var(--brand) 0.82 0.02 h)"
-          strokeWidth={1.5}
-        />
-      </svg>
-    );
-  } else if (shape === 's') {
-    const ribbonWidth = Math.max(14, size * 0.1);
-    const offset = ribbonWidth / 2 + seatSize / 2 + 4;
-    const pad = offset + seatSize / 2 + 4;
-    const d = sCurvePathD(size, pad);
-    const spine = sCurvePolyline(size, pad);
-    const nLeft = Math.ceil(seats / 2);
-    const nRight = seats - nLeft;
-    points = [...offsetPathPoints(spine, nLeft, -offset), ...offsetPathPoints(spine, nRight, offset)];
-    body = (
-      <svg width={size} height={size} style={{ position: 'absolute', inset: 0 }}>
-        <path d={d} fill="none" stroke="oklch(from var(--brand) 0.82 0.02 h)" strokeWidth={ribbonWidth + 3} strokeLinecap="round" strokeLinejoin="round" />
-        <path d={d} fill="none" stroke="oklch(from var(--brand) 0.95 0.015 h)" strokeWidth={ribbonWidth} strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  } else {
-    const radius = center - seatSize / 2 - 2;
-    const rx = radius;
-    const ry = shape === 'oval' ? radius * 0.68 : radius;
-    points = Array.from({ length: seats }, (_, i) => {
-      const angle = (2 * Math.PI * i) / seats - Math.PI / 2;
-      return { x: center + rx * Math.cos(angle), y: center + ry * Math.sin(angle) };
-    });
-    const bodyWidth = Math.max(50, rx * 2 - seatSize * 1.6);
-    const bodyHeight = Math.max(50, ry * 2 - seatSize * 1.6);
-    body = shape === 'donut' ? (
+  return (
+    <div style={{ position: 'relative', width: diameter, height: diameter }}>
       <div
         style={{
           position: 'absolute',
-          left: center - bodyWidth / 2,
-          top: center - bodyHeight / 2,
-          width: bodyWidth,
-          height: bodyHeight,
-          borderRadius: '50%',
-          border: `${Math.max(10, bodyWidth * 0.22)}px solid oklch(from var(--brand) 0.9 0.02 h)`,
-          boxShadow: '0 6px 16px oklch(from var(--brand) 0.3 0.03 h / 0.18), inset 0 1px 3px oklch(1 0 0 / 0.5)',
-        }}
-      />
-    ) : (
-      <div
-        style={{
-          position: 'absolute',
-          left: center - bodyWidth / 2,
-          top: center - bodyHeight / 2,
-          width: bodyWidth,
-          height: bodyHeight,
+          inset: diameter * 0.24,
           borderRadius: '50%',
           background: 'radial-gradient(circle at 34% 28%, oklch(from var(--brand) 0.99 0.008 h), oklch(from var(--brand) 0.92 0.02 h))',
           border: '1px solid oklch(from var(--brand) 0.84 0.02 h)',
           boxShadow: '0 6px 16px oklch(from var(--brand) 0.3 0.03 h / 0.18), inset 0 1px 3px oklch(1 0 0 / 0.7)',
-        }}
-      />
-    );
-  }
-
-  const slots = points.map((p, i) => ({ ...p, member: table.members[i] ?? null }));
-
-  return (
-    <div style={{ position: 'relative', width: size, height: size }}>
-      {body}
-      <div
-        style={{
-          position: 'absolute',
-          left: labelPos.x,
-          top: labelPos.y,
-          transform: 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          justifyContent: 'center',
           textAlign: 'center',
-          pointerEvents: 'none',
+          padding: 6,
         }}
       >
-        <span style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: Math.max(13, size * 0.075), color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.15 }}>
+        <span style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 500, fontSize: Math.max(13, diameter * 0.075), color: 'oklch(from var(--brand) 0.32 0.03 h)', lineHeight: 1.15 }}>
           {table.name}
         </span>
         <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', marginTop: 4 }}>
@@ -746,76 +568,16 @@ function TableDiagram({ table, onAssignClick, onUnassign, busyMemberId }: {
 
 type TableFormState = { mode: 'create'; zone: Zone; presetMain?: boolean } | { mode: 'edit'; table: SeatTable };
 
-function ShapeIcon({ shape }: { shape: TableShape }) {
-  const stroke = 'currentColor';
-  if (shape === 'l') {
-    return (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-        <path d="M3 3h20v10h-10v10h-10z" fill="currentColor" opacity="0.18" stroke={stroke} strokeWidth="1.5" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-  if (shape === 's') {
-    return (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-        <path d={sCurvePathD(26, 5)} fill="none" stroke={stroke} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
-      </svg>
-    );
-  }
-  if (shape === 'oval') {
-    return (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-        <ellipse cx="13" cy="13" rx="12" ry="8" fill="currentColor" opacity="0.18" stroke={stroke} strokeWidth="1.5" />
-      </svg>
-    );
-  }
-  if (shape === 'donut') {
-    return (
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-        <circle cx="13" cy="13" r="10" fill="none" stroke={stroke} strokeWidth="6" opacity="0.5" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-      <circle cx="13" cy="13" r="11" fill="currentColor" opacity="0.18" stroke={stroke} strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function ShapeSelector({ value, onChange }: { value: TableShape; onChange: (shape: TableShape) => void }) {
-  const shapes: TableShape[] = ['round', 'oval', 'donut', 'l', 's'];
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={labelStyle}>Table shape</label>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {shapes.map((s) => (
-          <button
-            key={s}
-            type="button"
-            onClick={() => onChange(s)}
-            style={{ ...sideSelectorBtnStyle(value === s), display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 10px', minWidth: 62, textTransform: 'none' }}
-          >
-            <ShapeIcon shape={s} />
-            <span style={{ fontSize: 10 }}>{SHAPE_LABEL[s]}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function TableFormModal({ form, saving, error, onCancel, onSubmit }: {
   form: TableFormState;
   saving: boolean;
   error: string | null;
   onCancel: () => void;
-  onSubmit: (name: string, zone: Zone, seats: number, shape: TableShape, isMain: boolean) => void;
+  onSubmit: (name: string, zone: Zone, seats: number, isMain: boolean) => void;
 }) {
   const [name, setName] = useState(form.mode === 'edit' ? form.table.name : '');
   const [zone, setZone] = useState<Zone>(form.mode === 'edit' ? form.table.zone : form.zone);
   const [seats, setSeats] = useState(form.mode === 'edit' ? form.table.seats : 8);
-  const [shape, setShape] = useState<TableShape>(form.mode === 'edit' ? form.table.shape : 'round');
   const [isMain, setIsMain] = useState(form.mode === 'edit' ? form.table.is_main : !!form.presetMain);
 
   return (
@@ -823,7 +585,6 @@ function TableFormModal({ form, saving, error, onCancel, onSubmit }: {
       <label style={labelStyle}>Table name</label>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Table 1" style={{ ...inputStyle, marginBottom: 14 }} />
       <SideSelector value={zone} onChange={setZone} label="Zone" />
-      <ShapeSelector value={shape} onChange={setShape} />
       <label style={labelStyle}>Seats</label>
       <input
         type="number"
@@ -841,7 +602,7 @@ function TableFormModal({ form, saving, error, onCancel, onSubmit }: {
       </label>
       {error && <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 12, color: 'oklch(var(--color-danger))', marginBottom: 10 }}>{error}</p>}
       <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-        <button onClick={() => onSubmit(name, zone, seats, shape, isMain)} disabled={saving || !name.trim() || seats < 1} style={primaryBtnStyle}>
+        <button onClick={() => onSubmit(name, zone, seats, isMain)} disabled={saving || !name.trim() || seats < 1} style={primaryBtnStyle}>
           {saving ? 'Saving…' : form.mode === 'create' ? 'Create table' : 'Save changes'}
         </button>
         <button onClick={onCancel} style={solidBtnStyle}>Cancel</button>
@@ -996,10 +757,7 @@ function TableCard({ table, onEdit, onDelete, onAssignClick, onUnassign, unassig
           Family
         </span>
       )}
-      <TableDiagram table={table} onAssignClick={onAssignClick} onUnassign={onUnassign} busyMemberId={unassigning} />
-      <span style={{ fontFamily: "'Jost',sans-serif", fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'oklch(from var(--brand) 0.55 0.03 h)' }}>
-        {SHAPE_LABEL[table.shape]}
-      </span>
+      <RoundTable table={table} onAssignClick={onAssignClick} onUnassign={onUnassign} busyMemberId={unassigning} />
       <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 11, color: 'oklch(from var(--brand) 0.5 0.03 h)', textAlign: 'center', margin: 0, minHeight: 14, maxWidth: 220 }}>
         {table.members.length > 0 ? table.members.map((m) => m.name).join(' · ') : 'No guests seated yet'}
       </p>
@@ -1379,7 +1137,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const submitTableForm = async (name: string, zone: Zone, seats: number, shape: TableShape, isMain: boolean) => {
+  const submitTableForm = async (name: string, zone: Zone, seats: number, isMain: boolean) => {
     if (!tableFormState) return;
     setTableFormSaving(true);
     setTableFormError(null);
@@ -1387,13 +1145,13 @@ export default function AdminDashboard() {
       if (tableFormState.mode === 'create') {
         const data = await api('/admin/api/tables', {
           method: 'POST',
-          body: JSON.stringify({ name, zone, seats, shape, is_main: isMain }),
+          body: JSON.stringify({ name, zone, seats, is_main: isMain }),
         });
         setTables((t) => [...(isMain ? t.map((item) => ({ ...item, is_main: false })) : t), data.table]);
       } else {
         const data = await api(`/admin/api/tables/${tableFormState.table.id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ name, zone, seats, shape, is_main: isMain }),
+          body: JSON.stringify({ name, zone, seats, is_main: isMain }),
         });
         setTables((t) => t.map((item) => {
           if (item.id === tableFormState.table.id) return data.table;

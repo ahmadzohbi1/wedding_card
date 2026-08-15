@@ -11,7 +11,6 @@ class Table extends Model
         'name',
         'zone',
         'seats',
-        'shape',
         'is_main',
     ];
 
