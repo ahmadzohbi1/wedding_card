@@ -11,10 +11,13 @@ class Table extends Model
         'name',
         'zone',
         'seats',
+        'shape',
+        'is_main',
     ];
 
     protected $casts = [
         'seats' => 'integer',
+        'is_main' => 'boolean',
     ];
 
     public function members(): HasMany

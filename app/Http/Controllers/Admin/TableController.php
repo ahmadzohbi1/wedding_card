@@ -20,7 +20,7 @@ class TableController extends Controller
     public function index(): JsonResponse
     {
         return response()->json([
-            'tables' => Table::with('members.guest')->orderBy('name')->get()->map($this->transform(...)),
+            'tables' => Table::with('members.guest')->orderByDesc('is_main')->orderBy('name')->get()->map($this->transform(...)),
             'unassigned' => GuestMember::whereNull('table_id')->with('guest')->get()->map($this->transformMember(...))
                 ->sortBy('guest_name')->values(),
         ]);
@@ -32,7 +32,13 @@ class TableController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
             'seats' => ['required', 'integer', 'min:1', 'max:24'],
+            'shape' => ['required', Rule::in(['round', 'oval', 'donut', 'l', 's'])],
+            'is_main' => ['sometimes', 'boolean'],
         ]);
+
+        if (! empty($data['is_main'])) {
+            Table::where('is_main', true)->update(['is_main' => false]);
+        }
 
         $table = Table::create($data);
 
@@ -45,6 +51,8 @@ class TableController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'zone' => ['required', Rule::in(['groom', 'bride'])],
             'seats' => ['required', 'integer', 'min:1', 'max:24'],
+            'shape' => ['required', Rule::in(['round', 'oval', 'donut', 'l', 's'])],
+            'is_main' => ['sometimes', 'boolean'],
         ]);
 
         $seated = $table->members()->count();
@@ -52,6 +60,10 @@ class TableController extends Controller
             throw ValidationException::withMessages([
                 'seats' => "This table already seats {$seated} guests. Move some guests before shrinking it.",
             ]);
+        }
+
+        if (! empty($data['is_main'])) {
+            Table::where('is_main', true)->where('id', '!=', $table->id)->update(['is_main' => false]);
         }
 
         $table->update($data);
@@ -206,6 +218,8 @@ class TableController extends Controller
             'name' => $table->name,
             'zone' => $table->zone,
             'seats' => $table->seats,
+            'shape' => $table->shape,
+            'is_main' => $table->is_main,
             'members' => $table->members->map($this->transformMember(...))->values(),
         ];
     }

@@ -40,6 +40,13 @@ a:hover {
   0%, 100% { transform: translateY(0); opacity: 0.55; }
   50% { transform: translateY(8px); opacity: 1; }
 }
+@keyframes handSwipe {
+  0% { transform: translate(-50%, 22px) rotate(-14deg); opacity: 0; }
+  15% { opacity: 1; }
+  65% { transform: translate(-50%, -16px) rotate(-14deg); opacity: 1; }
+  85% { opacity: 0; }
+  100% { transform: translate(-50%, 22px) rotate(-14deg); opacity: 0; }
+}
 @keyframes hoverSideways {
   0%, 100% { transform: translateX(-4px); }
   50% { transform: translateX(4px); }

@@ -436,9 +436,25 @@ export default function WeddingInvitationPage({ guest, showKidsMessage = true }:
               <p style={{ fontFamily: fontSans, fontSize: 15, letterSpacing: '0.08em', color: 'oklch(var(--color-paper))', margin: 0 }}>{WEDDING_DATE_LONG[lang]}</p>
               <p style={{ fontFamily: fontSans, fontSize: 13, color: 'oklch(from var(--brand) 0.9 0.01 h)', margin: '5px 0 0' }}>{VENUE_NAME[lang]}</p>
             </div>
-            <div style={{ position: 'absolute', bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, animation: 'bounceDown 2.2s ease-in-out infinite', zIndex: 2 }}>
+            <div style={{ position: 'absolute', bottom: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, zIndex: 2 }}>
               <span style={{ fontFamily: fontSans, fontSize: 10, letterSpacing: '0.25em', textTransform: lang === 'en' ? 'uppercase' : 'none', color: 'oklch(from var(--brand) 0.95 0.01 h)' }}>{t.scroll}</span>
-              <div style={{ width: 1, height: 20, background: 'oklch(from var(--brand) 0.95 0.01 h / 0.7)' }} />
+              <div style={{ position: 'relative', width: 26, height: 58, overflow: 'visible' }}>
+                <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 1, height: '100%', background: 'oklch(from var(--brand) 0.95 0.01 h / 0.3)' }} />
+                <img
+                  src="/assets/scroll-hand.png"
+                  alt=""
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    bottom: 0,
+                    width: 28,
+                    height: 28,
+                    transformOrigin: 'bottom center',
+                    filter: 'brightness(0) invert(1) drop-shadow(0 2px 5px oklch(from var(--brand) 0.2 0.03 h / 0.5))',
+                    animation: 'handSwipe 2.4s ease-in-out infinite',
+                  }}
+                />
+              </div>
             </div>
           </section>
 
