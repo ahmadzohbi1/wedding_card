@@ -1263,24 +1263,23 @@ export default function AdminDashboard() {
                 <button onClick={() => setSideFilter('total')} style={sideTabStyle(sideFilter === 'total')}>Show total</button>
               </div>
 
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', margin: '0 0 12px' }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', margin: '0 0 18px' }}>
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by name…"
                   style={{ ...inputStyle, width: 220 }}
                 />
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {(['all', 'yes', 'pending', 'no'] as const).map((s) => (
-                    <button key={s} onClick={() => setStatusFilter(s)} style={sideTabStyle(statusFilter === s)}>
-                      {s === 'all' ? 'All RSVP' : s === 'yes' ? 'Accepted' : s === 'no' ? 'Declined' : 'Pending'}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <button onClick={() => setNameSort('asc')} style={sideTabStyle(nameSort === 'asc')}>Name A→Z</button>
-                  <button onClick={() => setNameSort('desc')} style={sideTabStyle(nameSort === 'desc')}>Name Z→A</button>
-                </div>
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as RsvpStatus | 'all')} style={{ ...inputStyle, width: 170, cursor: 'pointer' }}>
+                  <option value="all">All RSVP</option>
+                  <option value="yes">Accepted</option>
+                  <option value="pending">Pending</option>
+                  <option value="no">Declined</option>
+                </select>
+                <select value={nameSort} onChange={(e) => setNameSort(e.target.value as 'asc' | 'desc')} style={{ ...inputStyle, width: 170, cursor: 'pointer' }}>
+                  <option value="asc">Name: A → Z</option>
+                  <option value="desc">Name: Z → A</option>
+                </select>
               </div>
 
               {loading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>Loading…</p>}
