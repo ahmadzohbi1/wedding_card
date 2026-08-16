@@ -985,6 +985,9 @@ export default function AdminDashboard() {
   const [viewingGuest, setViewingGuest] = useState<GuestGroup | null>(null);
 
   const [sideFilter, setSideFilter] = useState<SideFilter>('total');
+  const [statusFilter, setStatusFilter] = useState<RsvpStatus | 'all'>('all');
+  const [nameSort, setNameSort] = useState<'asc' | 'desc'>('asc');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
@@ -1064,7 +1067,13 @@ export default function AdminDashboard() {
     { groom: 0, bride: 0 } as Record<Side, number>,
   );
 
-  const filteredGuests = sideFilter === 'total' ? guests : guests.filter((g) => g.side === sideFilter);
+  const searchQueryNormalized = searchQuery.trim().toLowerCase();
+
+  const filteredGuests = guests
+    .filter((g) => sideFilter === 'total' || g.side === sideFilter)
+    .filter((g) => statusFilter === 'all' || g.members.some((m) => m.rsvp_status === statusFilter))
+    .filter((g) => !searchQueryNormalized || g.name.toLowerCase().includes(searchQueryNormalized) || g.members.some((m) => m.name.toLowerCase().includes(searchQueryNormalized)))
+    .sort((a, b) => (nameSort === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
 
   const submitForm = async (name: string, side: Side, gender: Gender, members: { id?: number; name: string }[]) => {
     if (!formState) return;
@@ -1248,17 +1257,39 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '2px 0 18px' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '2px 0 14px' }}>
                 <button onClick={() => setSideFilter('groom')} style={sideTabStyle(sideFilter === 'groom')}>Groom</button>
                 <button onClick={() => setSideFilter('bride')} style={sideTabStyle(sideFilter === 'bride')}>Bride</button>
                 <button onClick={() => setSideFilter('total')} style={sideTabStyle(sideFilter === 'total')}>Show total</button>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', margin: '0 0 12px' }}>
+                <input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name…"
+                  style={{ ...inputStyle, width: 220 }}
+                />
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {(['all', 'yes', 'pending', 'no'] as const).map((s) => (
+                    <button key={s} onClick={() => setStatusFilter(s)} style={sideTabStyle(statusFilter === s)}>
+                      {s === 'all' ? 'All RSVP' : s === 'yes' ? 'Accepted' : s === 'no' ? 'Declined' : 'Pending'}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => setNameSort('asc')} style={sideTabStyle(nameSort === 'asc')}>Name A→Z</button>
+                  <button onClick={() => setNameSort('desc')} style={sideTabStyle(nameSort === 'desc')}>Name Z→A</button>
+                </div>
               </div>
 
               {loading && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>Loading…</p>}
               {loadError && <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(var(--color-danger))' }}>{loadError}</p>}
 
               {!loading && !loadError && filteredGuests.length === 0 && (
-                <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>No invitations yet. Click "+ Add guest" to create one.</p>
+                <p style={{ fontFamily: "'Jost',sans-serif", color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+                  {guests.length === 0 ? 'No invitations yet. Click "+ Add guest" to create one.' : 'No invitations match your filters.'}
+                </p>
               )}
 
               {filteredGuests.length > 0 && (

@@ -65,6 +65,7 @@ class GuestController extends Controller
         ]);
 
         $guest->update(['name' => $data['name'], 'side' => $data['side'], 'gender' => $data['gender']]);
+        $guest->members()->where('is_primary', true)->update(['name' => $data['name']]);
 
         $keepIds = [];
 
