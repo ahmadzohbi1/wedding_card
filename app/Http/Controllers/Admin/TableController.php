@@ -36,7 +36,7 @@ class TableController extends Controller
         ]);
 
         if (! empty($data['is_main'])) {
-            Table::where('is_main', true)->update(['is_main' => false]);
+            Table::where('is_main', true)->where('zone', $data['zone'])->update(['is_main' => false]);
         }
 
         $table = Table::create($data);
@@ -61,7 +61,7 @@ class TableController extends Controller
         }
 
         if (! empty($data['is_main'])) {
-            Table::where('is_main', true)->where('id', '!=', $table->id)->update(['is_main' => false]);
+            Table::where('is_main', true)->where('zone', $data['zone'])->where('id', '!=', $table->id)->update(['is_main' => false]);
         }
 
         $table->update($data);

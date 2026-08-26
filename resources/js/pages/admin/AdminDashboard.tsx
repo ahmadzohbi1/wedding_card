@@ -1075,6 +1075,13 @@ export default function AdminDashboard() {
     .filter((g) => !searchQueryNormalized || g.name.toLowerCase().includes(searchQueryNormalized) || g.members.some((m) => m.name.toLowerCase().includes(searchQueryNormalized)))
     .sort((a, b) => (nameSort === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
 
+  const removeMemberIdsFromTables = (ids: number[]) => {
+    if (ids.length === 0) return;
+    const idSet = new Set(ids);
+    setTables((t) => t.map((table) => ({ ...table, members: table.members.filter((m) => !idSet.has(m.id)) })));
+    setUnassignedMembers((u) => u.filter((m) => !idSet.has(m.id)));
+  };
+
   const submitForm = async (name: string, side: Side, gender: Gender, members: { id?: number; name: string }[]) => {
     if (!formState) return;
     setFormSaving(true);
@@ -1087,11 +1094,14 @@ export default function AdminDashboard() {
         });
         setGuests((g) => [data.guest, ...g]);
       } else {
+        const keptIds = new Set(members.filter((m) => m.id).map((m) => m.id));
+        const removedIds = formState.guest.members.filter((m) => !m.is_primary && !keptIds.has(m.id)).map((m) => m.id);
         const data = await api(`/admin/api/guests/${formState.guest.id}`, {
           method: 'PATCH',
           body: JSON.stringify({ name, side, gender, members }),
         });
         setGuests((g) => g.map((item) => (item.id === formState.guest.id ? data.guest : item)));
+        removeMemberIdsFromTables(removedIds);
       }
       setFormState(null);
     } catch {
@@ -1122,6 +1132,7 @@ export default function AdminDashboard() {
     if (!confirm(`Delete ${guest.name}'s invitation?`)) return;
     await api(`/admin/api/guests/${guest.id}`, { method: 'DELETE' });
     setGuests((g) => g.filter((item) => item.id !== guest.id));
+    removeMemberIdsFromTables(guest.members.map((m) => m.id));
   };
 
   const copyLink = (guest: GuestGroup) => {
@@ -1156,7 +1167,7 @@ export default function AdminDashboard() {
           method: 'POST',
           body: JSON.stringify({ name, zone, seats, is_main: isMain }),
         });
-        setTables((t) => [...(isMain ? t.map((item) => ({ ...item, is_main: false })) : t), data.table]);
+        setTables((t) => [...(isMain ? t.map((item) => (item.zone === zone ? { ...item, is_main: false } : item)) : t), data.table]);
       } else {
         const data = await api(`/admin/api/tables/${tableFormState.table.id}`, {
           method: 'PATCH',
@@ -1164,7 +1175,7 @@ export default function AdminDashboard() {
         });
         setTables((t) => t.map((item) => {
           if (item.id === tableFormState.table.id) return data.table;
-          return isMain ? { ...item, is_main: false } : item;
+          return isMain && item.zone === zone ? { ...item, is_main: false } : item;
         }));
       }
       setTableFormState(null);
@@ -1375,39 +1386,41 @@ export default function AdminDashboard() {
 
               {!tablesLoading && !tablesError && (
                 <>
-                  {(() => {
-                    const mainTable = tables.find((t) => t.is_main);
-                    return (
-                      <div style={{ marginBottom: 28 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                          <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontWeight: 500, fontSize: 24, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>
-                            Family Table
-                          </h2>
-                          {!mainTable && (
-                            <button onClick={() => setTableFormState({ mode: 'create', zone: 'groom', presetMain: true })} style={addBtnStyle}>
-                              + Add family table
-                            </button>
+                  <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginBottom: 28 }}>
+                    {(['groom', 'bride'] as Zone[]).map((zone) => {
+                      const mainTable = tables.find((t) => t.is_main && t.zone === zone);
+                      return (
+                        <div key={zone} style={{ flex: '1 1 260px', minWidth: 260 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontWeight: 500, fontSize: 24, color: 'oklch(from var(--brand) 0.3 0.03 h)', margin: 0 }}>
+                              {SIDE_LABEL[zone]} Family Table
+                            </h2>
+                            {!mainTable && (
+                              <button onClick={() => setTableFormState({ mode: 'create', zone, presetMain: true })} style={addBtnStyle}>
+                                + Add family table
+                              </button>
+                            )}
+                          </div>
+                          {mainTable ? (
+                            <div style={{ maxWidth: 260 }}>
+                              <TableCard
+                                table={mainTable}
+                                onEdit={() => setTableFormState({ mode: 'edit', table: mainTable })}
+                                onDelete={() => deleteTable(mainTable)}
+                                onAssignClick={() => { setAssigningTable(mainTable); setSeatError(null); }}
+                                onUnassign={(memberId) => unassignMember(mainTable, memberId)}
+                                unassigning={seatBusyId}
+                              />
+                            </div>
+                          ) : (
+                            <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
+                              No family table yet for the {SIDE_LABEL[zone].toLowerCase()}. It'll stay pinned here once you add one.
+                            </p>
                           )}
                         </div>
-                        {mainTable ? (
-                          <div style={{ maxWidth: 260 }}>
-                            <TableCard
-                              table={mainTable}
-                              onEdit={() => setTableFormState({ mode: 'edit', table: mainTable })}
-                              onDelete={() => deleteTable(mainTable)}
-                              onAssignClick={() => { setAssigningTable(mainTable); setSeatError(null); }}
-                              onUnassign={(memberId) => unassignMember(mainTable, memberId)}
-                              unassigning={seatBusyId}
-                            />
-                          </div>
-                        ) : (
-                          <p style={{ fontFamily: "'Jost',sans-serif", fontSize: 13, color: 'oklch(from var(--brand) 0.5 0.03 h)' }}>
-                            No family table yet. It'll stay pinned here at the top once you add one.
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
+                      );
+                    })}
+                  </div>
 
                   <div style={{ display: 'flex', gap: 28, flexWrap: 'wrap', alignItems: 'flex-start' }}>
                     {(['groom', 'bride'] as Zone[]).map((zone) => (
